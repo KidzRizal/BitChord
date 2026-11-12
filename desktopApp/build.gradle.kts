@@ -46,6 +46,8 @@ val desktopModuleIndexUrl = localProperty("MODULE_INDEX_URL")
 // Last.fm signs every request with these, so signing in from inside the app
 // needs them at hand. Supplied locally and never committed, as on Android.
 val listenTogetherServer = localProperty("LISTEN_TOGETHER_SERVER")
+/** The Discord application presence runs under; blank turns presence off. */
+val discordApplicationId = localProperty("DISCORD_APPLICATION_ID").filter(Char::isDigit)
 val lastfmApiKey = localProperty("LASTFM_API_KEY")
 val lastfmSecret = localProperty("LASTFM_SECRET")
 
@@ -481,6 +483,9 @@ compose.desktop {
         }
         if (lastfmApiKey.isNotBlank() && lastfmSecret.isNotBlank()) {
             jvmArgs("-Dbitchord.lastfm.key=$lastfmApiKey", "-Dbitchord.lastfm.secret=$lastfmSecret")
+        }
+        if (discordApplicationId.isNotBlank()) {
+            jvmArgs("-Dbitchord.discord.appid=$discordApplicationId")
         }
         if (listenTogetherServer.isNotBlank()) {
             jvmArgs("-Dbitchord.listentogether.server=$listenTogetherServer")

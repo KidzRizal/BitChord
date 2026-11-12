@@ -57,6 +57,7 @@ internal object DesktopDiscordRpc {
 
     /** Looks for a local Discord. Cheap, and the answer changes when one starts. */
     fun refreshLocalClient() {
+        if (APPLICATION_ID.isBlank()) return
         scope.launch {
             val found = DesktopDiscordIpc.connect(APPLICATION_ID)
             if (found != null) {
@@ -116,7 +117,7 @@ internal object DesktopDiscordRpc {
      * ignored that would finish its countdown mid-song.
      */
     fun onPlaybackStateChanged(state: DesktopPlaybackState, speed: Float) {
-        if (!_enabled.value) return
+        if (!_enabled.value || APPLICATION_ID.isBlank()) return
         val song = state.song
         if (song == null || !state.isPlaying) {
             clear()
@@ -297,7 +298,9 @@ internal object DesktopDiscordRpc {
     private const val KEY_USERNAME = "discord_username"
     private const val KEY_ENABLED = "discord_rpc_enabled"
 
-    private const val APPLICATION_ID = ""
+    /** Supplied at build time (DISCORD_APPLICATION_ID); blank turns presence off. */
+    private val APPLICATION_ID: String =
+        System.getProperty("bitchord.discord.appid").orEmpty().filter(Char::isDigit)
     private const val ART_PX = 480
     private const val FALLBACK_ART_URL =
         "https://raw.githubusercontent.com/kushagrasinghx/BitChord/main/app/src/main/ic_launcher-playstore.png"
