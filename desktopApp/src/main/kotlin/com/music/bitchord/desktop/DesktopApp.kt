@@ -1580,6 +1580,7 @@ fun BitChordDesktopApp() {
                     partySync.onLocalIntent()
                 }
             },
+            livePlayback = { playbackEngine.state.value },
         )
     }
     DisposableEffect(mprisController) {

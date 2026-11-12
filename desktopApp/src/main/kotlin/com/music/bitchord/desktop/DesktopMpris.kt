@@ -80,6 +80,12 @@ internal class DesktopMprisController(
     private val onRateChanged: (Double) -> Unit,
     private val onVolumeChanged: (Double) -> Unit,
     private val onSeek: (Long) -> Unit,
+    /**
+     * The playback state as it is right now. [update] is only called on discrete changes
+     * (track, play/pause, ...), so Position read from that snapshot would sit at the value it
+     * had when the track started; lyric widgets polling Position need the live playhead.
+     */
+    private val livePlayback: (() -> DesktopPlaybackState)? = null,
 ) {
     private val lock = Any()
     private val worker: ExecutorService = Executors.newSingleThreadExecutor { runnable ->
@@ -216,7 +222,7 @@ internal class DesktopMprisController(
                 "Rate" to variant(rate),
                 "Shuffle" to variant(shuffle),
                 "Volume" to variant(state.volume.toDouble().coerceIn(0.0, 1.0)),
-                "Position" to variant(state.positionMs.coerceAtLeast(0L) * 1_000L),
+                "Position" to variant(livePositionMs() * 1_000L),
                 "MinimumRate" to variant(0.25),
                 "MaximumRate" to variant(3.0),
                 "CanGoNext" to variant(state.song != null),
@@ -276,6 +282,19 @@ internal class DesktopMprisController(
 
     private fun trackPath(song: Song): String =
         "$MPRIS_OBJECT_PATH/track/${Integer.toUnsignedString(song.videoId.hashCode(), 16)}"
+
+    /** The playhead now, extrapolated from the sink's last reading while audio is running. */
+    private fun livePositionMs(): Long {
+        val current = livePlayback?.invoke() ?: state
+        var position = current.positionMs
+        if (current.isPlaying && !current.awaitingAudio && current.positionSampledAtNanos > 0L) {
+            val elapsedMs = (System.nanoTime() - current.positionSampledAtNanos) / 1_000_000L
+            position += (elapsedMs * rate).toLong()
+        }
+        val duration = current.durationMs
+        if (duration > 0L) position = position.coerceAtMost(duration)
+        return position.coerceAtLeast(0L)
+    }
 
     private fun variant(value: Any, signature: String? = null): Variant<*> =
         if (signature == null) Variant(value) else Variant(value, signature)
