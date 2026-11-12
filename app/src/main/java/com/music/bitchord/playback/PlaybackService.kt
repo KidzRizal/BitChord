@@ -7641,8 +7641,6 @@ class PlaybackService : MediaLibraryService() {
                 AppSettings.discordActivityName,
                 AppSettings.discordButton1Text,
                 AppSettings.discordButton1Visible,
-                AppSettings.discordButton2Text,
-                AppSettings.discordButton2Visible,
                 AppSettings.playbackSpeed,
             ) { it.toList() }
                 .distinctUntilChanged()
@@ -7709,6 +7707,7 @@ class PlaybackService : MediaLibraryService() {
      * track change.
      */
     private fun pushDiscordPresence(exoPlayer: ExoPlayer) {
+        if (!com.music.bitchord.data.discord.DiscordApplication.isConfigured) return
         val rpc = discordRpc ?: return
         val song = exoPlayer.currentMediaItem?.toSong() ?: return
         // Read on the main thread, before the push is handed to IO: by the time
@@ -7743,8 +7742,6 @@ class PlaybackService : MediaLibraryService() {
                 status = AppSettings.discordStatus.value,
                 button1Text = AppSettings.discordButton1Text.value,
                 button1Visible = AppSettings.discordButton1Visible.value,
-                button2Text = AppSettings.discordButton2Text.value,
-                button2Visible = AppSettings.discordButton2Visible.value,
                 activityType = AppSettings.discordActivityType.value,
                 activityName = AppSettings.discordActivityName.value,
                 audioQuality = audioQuality,

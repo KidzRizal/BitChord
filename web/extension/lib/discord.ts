@@ -2,6 +2,7 @@ import type { DiscordNowPlaying, DiscordPresenceOptions, DiscordState } from '@b
 import { installDiscordFetchRule } from './rules';
 
 declare const __DISCORD_PRESENCE__: boolean;
+declare const __DISCORD_APPLICATION_ID__: string;
 
 /**
  * Discord rich presence (prompt §7.2), behind the DISCORD_PRESENCE build flag.
@@ -27,12 +28,11 @@ declare const __DISCORD_PRESENCE__: boolean;
  */
 
 /** BitChord's own Discord application (DiscordApplication.kt). */
-export const APPLICATION_ID = '1543679166967193620';
+/** Supplied at build time (DISCORD_APPLICATION_ID); blank turns presence off. */
+export const APPLICATION_ID: string = typeof __DISCORD_APPLICATION_ID__ !== 'undefined' ? __DISCORD_APPLICATION_ID__ : '';
 const GATEWAY = 'wss://gateway.discord.gg/?v=9&encoding=json';
 const API = 'https://discord.com/api/v9';
-const PROJECT_URL = 'https://github.com/kushagrasinghx/BitChord';
 const DEFAULT_BUTTON_1 = 'Listen on YouTube Music';
-const DEFAULT_BUTTON_2 = 'Visit BitChord';
 const APP_NAME = 'BitChord';
 
 const INITIAL_RECONNECT_MS = 1_000;
@@ -406,7 +406,6 @@ export async function buildPresence(token: string, track: DiscordNowPlaying, opt
   const watchUrl = `https://music.youtube.com/watch?v=${track.videoId}`;
   const buttons: [string, string][] = [];
   if (options.button1Visible) buttons.push([resolveVariables(options.button1Text || DEFAULT_BUTTON_1, track), watchUrl]);
-  if (options.button2Visible) buttons.push([resolveVariables(options.button2Text || DEFAULT_BUTTON_2, track), PROJECT_URL]);
   const art = track.artworkUrl?.startsWith('http') ? track.artworkUrl : null;
   // An unreachable mirror keeps the raw URL, as RpcImage.ExternalImage does.
   const largeImage = art ? ((await externalAsset(token, art)) ?? art) : null;
@@ -447,7 +446,7 @@ let gatewayProblem: string | null = null;
 let idleTimer: ReturnType<typeof setTimeout> | undefined;
 let listener: ((state: DiscordState) => void) | null = null;
 
-export const AVAILABLE = typeof __DISCORD_PRESENCE__ !== 'undefined' && __DISCORD_PRESENCE__;
+export const AVAILABLE = typeof __DISCORD_PRESENCE__ !== 'undefined' && __DISCORD_PRESENCE__ && APPLICATION_ID !== '';
 
 /** The background broadcasts every change to the open pages. */
 export function onDiscordState(callback: (state: DiscordState) => void): void {

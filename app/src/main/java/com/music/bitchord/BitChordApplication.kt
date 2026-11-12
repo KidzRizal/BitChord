@@ -91,6 +91,8 @@ class BitChordApplication : Application(), SingletonImageLoader.Factory, Configu
         // asks for its refresh rate itself (MainActivity.applyPerformanceMode),
         // so those votes buy nothing — and they kept resetting that request.
         ComposeUiFlags.isAdaptiveRefreshRateEnabled = false
+        // Discord presence runs under the application id the build was given.
+        com.music.bitchord.data.discord.DiscordApplication.ID = BuildConfig.DISCORD_APPLICATION_ID
         // The Spotify library and import live in the shared module; the tokens are the WebView's.
         SpotifyLibrary.auth = SpotifyLibrary.Auth {
             SpotifyToken.accessToken()?.let { SpotifyLibrary.Tokens(it, SpotifyToken.clientToken()) }

@@ -14,5 +14,13 @@ package com.music.bitchord.data.discord
  * application's name to the activity's.
  */
 object DiscordApplication {
-    const val ID = "1543679166967193620"
+    /**
+     * Supplied at build time (`DISCORD_APPLICATION_ID` in local.properties or the
+     * environment) and installed by each app at start-up, so no id is committed.
+     * Blank means presence is off: Discord refuses an activity with no application.
+     */
+    @Volatile
+    var ID: String = ""
+
+    val isConfigured: Boolean get() = ID.isNotBlank()
 }

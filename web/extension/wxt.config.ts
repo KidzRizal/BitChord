@@ -23,6 +23,7 @@ export default defineConfig({
       // Checked against every sender at runtime (entrypoints/background.ts).
       __SITE_ORIGINS__: JSON.stringify(SITE_ORIGINS),
       __DISCORD_PRESENCE__: JSON.stringify(DISCORD_PRESENCE),
+      __DISCORD_APPLICATION_ID__: JSON.stringify((process.env.DISCORD_APPLICATION_ID ?? '').replace(/\D/g, '')),
     },
   }),
   manifest: ({ browser }) => ({

@@ -96,7 +96,7 @@ enum class DiscordActivityKind(val value: String, val verb: String, val label: S
  * rendered by the activity, above the tab bar and mini player, rather than
  * inside the scrolling screen where a full-screen scrim would be trapped.
  */
-enum class DiscordDialog { TOKEN, STATUS, ACTIVITY_TYPE, ACTIVITY_NAME, BUTTON_1, BUTTON_2 }
+enum class DiscordDialog { TOKEN, STATUS, ACTIVITY_TYPE, ACTIVITY_NAME, BUTTON_1 }
 
 private fun statusOf(value: String) =
     DiscordPresenceStatus.entries.firstOrNull { it.value == value } ?: DiscordPresenceStatus.ONLINE
@@ -176,8 +176,6 @@ fun DiscordScreen(
     val activityName by AppSettings.discordActivityName.collectAsStateWithLifecycle()
     val button1Text by AppSettings.discordButton1Text.collectAsStateWithLifecycle()
     val button1Visible by AppSettings.discordButton1Visible.collectAsStateWithLifecycle()
-    val button2Text by AppSettings.discordButton2Text.collectAsStateWithLifecycle()
-    val button2Visible by AppSettings.discordButton2Visible.collectAsStateWithLifecycle()
     val infoDismissed by AppSettings.discordInfoDismissed.collectAsStateWithLifecycle()
     val nerdStats by NerdStats.current.collectAsStateWithLifecycle()
 
@@ -348,19 +346,6 @@ fun DiscordScreen(
                         },
                         onClick = { onOpenDialog(DiscordDialog.BUTTON_1) },
                     )
-                    RowDivider()
-                    SettingsRow(
-                        icon = SfIcons.SmartButton,
-                        title = stringResource(R.string.second_button),
-                        subtitle = button2Text.ifEmpty { DiscordRPC.DEFAULT_BUTTON_2 },
-                        trailing = {
-                            IosSwitch(
-                                checked = button2Visible,
-                                onCheckedChange = AppSettings::setDiscordButton2Visible,
-                            )
-                        },
-                        onClick = { onOpenDialog(DiscordDialog.BUTTON_2) },
-                    )
                 }
             }
         }
@@ -379,8 +364,6 @@ fun DiscordScreen(
                 audioQuality = discordAudioQualityLine(nerdStats).takeIf { showAudioQuality },
                 button1Text = button1Text,
                 button1Visible = button1Visible,
-                button2Text = button2Text,
-                button2Visible = button2Visible,
             )
         }
 
@@ -548,8 +531,6 @@ private fun RichPresencePreview(
     audioQuality: String?,
     button1Text: String,
     button1Visible: Boolean,
-    button2Text: String,
-    button2Visible: Boolean,
 ) {
     val context = LocalContext.current
     val title = song?.title ?: stringResource(R.string.widget_preview_title)
@@ -632,18 +613,6 @@ private fun RichPresencePreview(
                             Intent(Intent.ACTION_VIEW, DiscordRPC.watchUrl(it).toUri()),
                         )
                     }
-                },
-            )
-        }
-        if (button2Visible) {
-            Spacer(Modifier.height(8.dp))
-            PresenceButton(
-                label = resolved(button2Text, DiscordRPC.DEFAULT_BUTTON_2),
-                enabled = true,
-                onClick = {
-                    context.startActivity(
-                        Intent(Intent.ACTION_VIEW, DiscordRPC.PROJECT_URL.toUri()),
-                    )
                 },
             )
         }
@@ -836,25 +805,18 @@ fun DiscordDialogHost(
             )
         }
 
-        DiscordDialog.BUTTON_1, DiscordDialog.BUTTON_2 -> {
-            val first = which == DiscordDialog.BUTTON_1
-            val flow = if (first) AppSettings.discordButton1Text else AppSettings.discordButton2Text
-            val current by flow.collectAsStateWithLifecycle()
+        DiscordDialog.BUTTON_1 -> {
+            val current by AppSettings.discordButton1Text.collectAsStateWithLifecycle()
             var input by remember { mutableStateOf(current) }
             TextValueAlert(
                 hazeState = hazeState,
-                title = if (first) stringResource(R.string.first_button)
-                else stringResource(R.string.second_button),
+                title = stringResource(R.string.first_button),
                 message = stringResource(R.string.discord_button_variables),
-                placeholder = if (first) DiscordRPC.DEFAULT_BUTTON_1 else DiscordRPC.DEFAULT_BUTTON_2,
+                placeholder = DiscordRPC.DEFAULT_BUTTON_1,
                 value = input,
                 onValueChange = { input = it },
                 onSave = {
-                    if (first) {
-                        AppSettings.setDiscordButton1Text(input.trim())
-                    } else {
-                        AppSettings.setDiscordButton2Text(input.trim())
-                    }
+                    AppSettings.setDiscordButton1Text(input.trim())
                     onDismiss()
                 },
                 onDismiss = onDismiss,

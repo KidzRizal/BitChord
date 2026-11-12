@@ -47,6 +47,13 @@ val lastfmSecret: String = (
  * builds and runs, and simply asks for an address the first time somebody opens
  * the screen. See ListenTogether.DEFAULT_SERVER.
  */
+/** The Discord application presence is published under; blank turns presence off. */
+val discordApplicationId: String = (
+    localProps.getProperty("DISCORD_APPLICATION_ID")
+        ?: System.getenv("DISCORD_APPLICATION_ID")
+        ?: ""
+    ).trim()
+
 val listenTogetherServer: String = (
     localProps.getProperty("LISTEN_TOGETHER_SERVER")
         ?: System.getenv("LISTEN_TOGETHER_SERVER")
@@ -101,6 +108,7 @@ android {
         // the same GitHub release, told apart by file name. See
         // AppUpdateChecker.apkAssetUrl.
         buildConfigField("String", "UPDATE_APK_PREFIX", "\"BitChord-\"")
+        buildConfigField("String", "DISCORD_APPLICATION_ID", "\"${discordApplicationId.filter(Char::isDigit)}\"")
     }
 
     splits {

@@ -27,7 +27,6 @@ import java.util.Locale
  *   └────┘  Hi-Res Lossless · FLAC · 4608 kbps · 24-bit · 96 kHz
  *           ▁▁▁▁▁▁ 1:04 / 3:47     <- from the timestamps
  *   [ Listen on YouTube Music ]    <- button 1
- *   [ Visit BitChord           ]   <- button 2
  * ```
  */
 class DiscordRPC(
@@ -62,8 +61,6 @@ class DiscordRPC(
         status: String = "online",
         button1Text: String = "",
         button1Visible: Boolean = true,
-        button2Text: String = "",
-        button2Visible: Boolean = true,
         activityType: String = "listening",
         activityName: String = "",
         audioQuality: String? = null,
@@ -89,13 +86,6 @@ class DiscordRPC(
                 song,
             )
             buttonsList.add(resolvedText to watchUrl(song))
-        }
-        if (button2Visible) {
-            val resolvedText = resolveVariables(
-                button2Text.ifEmpty { DEFAULT_BUTTON_2 },
-                song,
-            )
-            buttonsList.add(resolvedText to PROJECT_URL)
         }
 
         val type = when (activityType) {
@@ -149,10 +139,7 @@ class DiscordRPC(
         context.getString(R.string.app_name).removeSuffix(" Dev")
 
     companion object {
-        const val PROJECT_URL = "https://github.com/kushagrasinghx/BitChord"
-
         const val DEFAULT_BUTTON_1 = "Listen on YouTube Music"
-        const val DEFAULT_BUTTON_2 = "Visit BitChord"
 
         /** Discord draws the sleeve at roughly 96dp; 480px covers it on any density. */
         private const val ART_PX = 480
