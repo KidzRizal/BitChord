@@ -51,6 +51,14 @@ fun main() {
             available = { DesktopPoTokenWebView.available },
         ).asTokenProvider(),
     )
+    // Spotify library (playlists, Liked Songs) signs in with the same sp_dc cookie Canvas uses.
+    com.music.bitchord.data.spotify.SpotifyLibrary.auth = com.music.bitchord.data.spotify.SpotifyLibrary.Auth {
+        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            DesktopSpotifyToken.accessToken()?.let {
+                com.music.bitchord.data.spotify.SpotifyLibrary.Tokens(it, DesktopSpotifyToken.clientToken())
+            }
+        }
+    }
     // The public "apps open right now" count; see Presence.
     DesktopPresence.install()
     desktopMain()

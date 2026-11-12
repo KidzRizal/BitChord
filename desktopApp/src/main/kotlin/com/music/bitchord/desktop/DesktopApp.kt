@@ -465,6 +465,7 @@ private enum class DesktopDestination(val id: String, val label: String) {
     HISTORY("history", "History"),
     DOWNLOADS("downloads", "Downloads"),
     LOCAL_MUSIC("local-music", "Local Music"),
+    SPOTIFY("spotify", "Spotify"),
     SETTINGS("settings", "Settings"),
 }
 
@@ -3921,6 +3922,15 @@ fun BitChordDesktopApp() {
                             contentPadding = contentPadding,
                             menu = { song -> songMenu(song) },
                         )
+                        destination == DesktopDestination.SPOTIFY -> DesktopSpotifyLibraryPage(
+                            signedIn = spotifyCanvasCookie.isNotBlank(),
+                            contentPadding = contentPadding,
+                            onConnect = { overlays.settingsPage = DesktopSettingsPage.SPOTIFY_CANVAS },
+                            onPlay = { songs, start, title ->
+                                playSongs(songs, start, DesktopQueueSource(title, PlaybackSourceType.BROWSE))
+                            },
+                            onEnqueue = { songs -> songs.forEach(::addToQueue) },
+                        )
                     }
                 }
                 }
@@ -4337,6 +4347,9 @@ private fun DesktopSidebar(
             }
             DesktopSidebarItem(BitChordIcons.Library, "Local Music", destination == DesktopDestination.LOCAL_MUSIC) {
                 onDestinationSelected(DesktopDestination.LOCAL_MUSIC)
+            }
+            DesktopSidebarItem(Icons.AutoMirrored.Rounded.PlaylistPlay, "Spotify", destination == DesktopDestination.SPOTIFY) {
+                onDestinationSelected(DesktopDestination.SPOTIFY)
             }
             Spacer(Modifier.height(6.dp))
             HorizontalDivider(color = desktopChromeDivider())
