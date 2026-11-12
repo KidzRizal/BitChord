@@ -357,28 +357,37 @@ internal object DesktopSpotifyToken {
         cachedAccessToken?.let { if (now < accessTokenExpiresAtMs - 30_000) return it }
         if (now < retryAfterMs) return null
 
-        val secret = TOTP_SECRETS.maxByOrNull { it.key }
-        val code = secret?.let { totp(it.value, now / 1000) }
-        val query = buildList {
-            add("reason" to "init")
-            add("productType" to "web-player")
-            if (code != null && secret != null) {
-                add("totp" to code)
-                add("totpServer" to code)
-                add("totpVer" to secret.key.toString())
-            }
-        }.joinToString("&") { (name, value) -> "$name=${URLEncoder.encode(value, StandardCharsets.UTF_8)}" }
+        // The secret the live web player uses first, re-read once if Spotify says it is retired;
+        // the built-in table only when the bundle cannot be read at all.
+        var root: kotlinx.serialization.json.JsonObject? = null
+        for (force in listOf(false, true)) {
+            val secret = liveSecret(force) ?: TOTP_SECRETS.maxByOrNull { it.key }?.toPair()
+            val code = secret?.let { totp(it.second, now / 1000) }
+            val query = buildList {
+                add("reason" to "init")
+                add("productType" to "web-player")
+                if (code != null && secret != null) {
+                    add("totp" to code)
+                    add("totpServer" to code)
+                    add("totpVer" to secret.first.toString())
+                }
+            }.joinToString("&") { (name, value) -> "$name=${URLEncoder.encode(value, StandardCharsets.UTF_8)}" }
 
-        val body = canvasGet(
-            "$TOKEN_URL?$query",
-            mapOf(
-                "Cookie" to "sp_dc=$cookie",
-                "Referer" to "https://open.spotify.com/",
-                "App-Platform" to "WebPlayer",
-            ),
-        )
-        val root = body?.let { runCatching { json.parseToJsonElement(it).jsonObject }.getOrNull() }
-        val token = root?.get("accessToken")?.jsonPrimitive?.contentOrNull
+            val body = canvasGet(
+                "$TOKEN_URL?$query",
+                mapOf(
+                    "Cookie" to "sp_dc=$cookie",
+                    "Referer" to "https://open.spotify.com/",
+                    "App-Platform" to "WebPlayer",
+                ),
+            )
+            root = body?.let { runCatching { json.parseToJsonElement(it).jsonObject }.getOrNull() }
+            val expired = root?.get("totpVerExpired")?.jsonPrimitive?.contentOrNull
+            if (expired != null && !force) continue
+            break
+        }
+        val anonymous = root?.get("isAnonymous")?.jsonPrimitive?.contentOrNull == "true"
+        val token = root?.get("accessToken")?.jsonPrimitive?.contentOrNull?.takeUnless { anonymous }
         if (token.isNullOrBlank()) {
             // Backed off rather than retried per track: if Spotify has changed the shape, asking on
             // every skip fixes nothing and makes every canvas lookup pay for the round trip.
@@ -389,8 +398,59 @@ internal object DesktopSpotifyToken {
         cachedAccessToken = token
         accessTokenExpiresAtMs = root["accessTokenExpirationTimestampMs"]
             ?.jsonPrimitive?.contentOrNull?.toLongOrNull() ?: (now + 3_600_000)
-        cachedClientId = root["clientId"]?.jsonPrimitive?.contentOrNull
+        cachedClientId = root?.get("clientId")?.jsonPrimitive?.contentOrNull
         return token
+    }
+
+    @Volatile private var liveSecretCache: Pair<Int, IntArray>? = null
+    @Volatile private var liveSecretAtMs = 0L
+
+    /**
+     * The newest `{secret:'…',version:N}` the live web-player bundle declares, as character codes.
+     * Spotify rotates it; a hardcoded table goes stale and every token request then fails.
+     */
+    private fun liveSecret(force: Boolean): Pair<Int, IntArray>? {
+        val now = System.currentTimeMillis()
+        if (!force) liveSecretCache?.let { if (now - liveSecretAtMs < 12 * 3_600_000L) return it }
+        val html = canvasGet("https://open.spotify.com/") ?: return liveSecretCache
+        val bundleUrl = Regex("""https://open\.spotifycdn\.com/cdn/build/web-player/web-player\.[0-9a-f]+\.js""")
+            .find(html)?.value ?: return liveSecretCache
+        val bundle = canvasGet(bundleUrl) ?: return liveSecretCache
+        val found = Regex("""\{secret:(['"])((?:\\.|(?!\1).)*)\1,version:(\d+)\}""")
+            .findAll(bundle)
+            .map { it.groupValues[3].toInt() to unescapeJs(it.groupValues[2]).map(Char::code).toIntArray() }
+            .maxByOrNull { it.first }
+            ?: return liveSecretCache
+        liveSecretCache = found
+        liveSecretAtMs = now
+        DesktopTrackLog.log("spotify: web player secret v${found.first}")
+        return found
+    }
+
+    /** A JavaScript string literal's body, unescaped (the bundle writes its secrets as literals). */
+    internal fun unescapeJs(body: String): String {
+        val out = StringBuilder()
+        var i = 0
+        while (i < body.length) {
+            val c = body[i]
+            if (c != '\\' || i + 1 >= body.length) { out.append(c); i++; continue }
+            val e = body[i + 1]
+            when {
+                e == 'x' && i + 3 < body.length -> { out.append(body.substring(i + 2, i + 4).toInt(16).toChar()); i += 4 }
+                e == 'u' && i + 2 < body.length && body[i + 2] == '{' -> {
+                    val end = body.indexOf('}', i + 3)
+                    out.appendCodePoint(body.substring(i + 3, end).toInt(16)); i = end + 1
+                }
+                e == 'u' && i + 5 < body.length -> { out.append(body.substring(i + 2, i + 6).toInt(16).toChar()); i += 6 }
+                else -> {
+                    out.append(
+                        when (e) { 'n' -> '\n'; 'r' -> '\r'; 't' -> '\t'; 'b' -> '\b'; 'f' -> '\u000C'; 'v' -> '\u000B'; '0' -> '\u0000'; else -> e },
+                    )
+                    i += 2
+                }
+            }
+        }
+        return out.toString()
     }
 
     /**
@@ -489,7 +549,8 @@ internal object DesktopSpotifyToken {
         12 to intArrayOf(107, 81, 49, 57, 67, 93, 87, 81, 69, 67, 40, 93, 48, 50, 46, 91, 94, 113, 41, 47),
     )
 
-    private const val RETRY_MS = 30L * 60 * 1000
+    /** Short: the listener is usually looking at the Spotify page waiting for it. */
+    private const val RETRY_MS = 60L * 1000
 
     internal const val KEY_SPDC = "spotify_spdc_token"
 }
