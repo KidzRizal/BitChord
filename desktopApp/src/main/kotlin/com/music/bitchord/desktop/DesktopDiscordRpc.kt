@@ -117,7 +117,6 @@ internal object DesktopDiscordRpc {
      */
     fun onPlaybackStateChanged(state: DesktopPlaybackState, speed: Float) {
         if (!_enabled.value) return
-        if (_token.value.isBlank() && ipc == null) return
         val song = state.song
         if (song == null || !state.isPlaying) {
             clear()
@@ -139,6 +138,15 @@ internal object DesktopDiscordRpc {
             }
             // The socket first, and the gateway only if there is no socket:
             // publishing through both would put the same presence up twice.
+            // Connected here too, not only when the settings dialog opens, so a
+            // fresh start (or Discord starting after BitChord) still gets a presence.
+            if (ipc == null) {
+                DesktopDiscordIpc.connect(APPLICATION_ID)?.let {
+                    ipc = it
+                    _localClient.value = true
+                    DesktopTrackLog.log("discord: connected to the local client")
+                }
+            }
             val local = ipc
             if (local != null) {
                 val sent = runCatching {
@@ -149,7 +157,12 @@ internal object DesktopDiscordRpc {
                 ipc = null
                 _localClient.value = false
             }
-            if (_token.value.isBlank()) return@launch
+            if (_token.value.isBlank()) {
+                // Nothing to publish through yet; let the next change try again.
+                lastKey = null
+                DesktopTrackLog.log("discord: no local client and no token; presence skipped")
+                return@launch
+            }
             runCatching {
                 val client = rpc ?: KizzyRPC(
                     token = _token.value,
