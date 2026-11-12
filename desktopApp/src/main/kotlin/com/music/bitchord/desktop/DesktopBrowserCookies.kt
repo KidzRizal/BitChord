@@ -94,6 +94,30 @@ internal object DesktopBrowserCookies {
         }
     }.sortedBy { it.label }
 
+    /**
+     * One named cookie for [hostSuffix] in [profile] (e.g. Spotify's `sp_dc`), or null when the
+     * profile holds none or it cannot be decrypted. The value is never logged.
+     */
+    fun readCookie(profile: Profile, hostSuffix: String, name: String): String? {
+        if (!Files.isReadable(profile.database)) return null
+        val copy = runCatching {
+            Files.createTempFile("bitchord-cookies", ".sqlite").also {
+                Files.copy(profile.database, it, StandardCopyOption.REPLACE_EXISTING)
+            }
+        }.getOrElse { return null }
+        try {
+            val jar = when (profile.family) {
+                Family.FIREFOX -> readFirefox(copy, hostSuffix)
+                Family.CHROMIUM -> readChromium(copy, profile, hostSuffix)
+            } as? Result.Session ?: return null
+            return jar.cookie.split("; ").firstOrNull { it.substringBefore('=') == name }
+                ?.substringAfter('=', "")
+                ?.takeIf { it.isNotBlank() }
+        } finally {
+            runCatching { Files.deleteIfExists(copy) }
+        }
+    }
+
     /** Reads [profile]'s YouTube cookies as a `Cookie` header value. */
     fun read(profile: Profile): Result {
         if (!Files.isReadable(profile.database)) return Result.Unavailable("its cookie store cannot be read")
@@ -118,11 +142,12 @@ internal object DesktopBrowserCookies {
         }
     }
 
-    private fun readFirefox(database: Path): Result = query(database) { connection ->
+    private fun readFirefox(database: Path, hostSuffix: String = "youtube.com"): Result = query(database) { connection ->
         val cookies = LinkedHashMap<String, String>()
         connection.prepareStatement(
-            "SELECT name, value FROM moz_cookies WHERE host LIKE '%youtube.com'",
+            "SELECT name, value FROM moz_cookies WHERE host LIKE ?",
         ).use { statement ->
+            statement.setString(1, "%$hostSuffix")
             statement.executeQuery().use { rows ->
                 while (rows.next()) {
                     val name = rows.getString(1) ?: continue
@@ -134,7 +159,7 @@ internal object DesktopBrowserCookies {
         Result.Session(cookies.entries.joinToString("; ") { "${it.key}=${it.value}" })
     }
 
-    private fun readChromium(database: Path, profile: Profile): Result {
+    private fun readChromium(database: Path, profile: Profile, hostSuffix: String = "youtube.com"): Result {
         val linuxPassword = if (DesktopPlatform.isLinux) {
             profile.secretAttribute?.let { DesktopSecretStore.lookup(mapOf("application" to it)) }
         } else {
@@ -146,8 +171,9 @@ internal object DesktopBrowserCookies {
             var undecipherable = 0
             var appBoundSigningCookie = false
             connection.prepareStatement(
-                "SELECT host_key, name, value, encrypted_value FROM cookies WHERE host_key LIKE '%youtube.com'",
+                "SELECT host_key, name, value, encrypted_value FROM cookies WHERE host_key LIKE ?",
             ).use { statement ->
+                statement.setString(1, "%$hostSuffix")
                 statement.executeQuery().use { rows ->
                     while (rows.next()) {
                         val host = rows.getString(1).orEmpty()

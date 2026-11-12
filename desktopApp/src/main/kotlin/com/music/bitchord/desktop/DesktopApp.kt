@@ -3923,9 +3923,10 @@ fun BitChordDesktopApp() {
                             menu = { song -> songMenu(song) },
                         )
                         destination == DesktopDestination.SPOTIFY -> DesktopSpotifyLibraryPage(
-                            signedIn = spotifyCanvasCookie.isNotBlank(),
+                            cookie = spotifyCanvasCookie,
                             contentPadding = contentPadding,
                             onConnect = { overlays.settingsPage = DesktopSettingsPage.SPOTIFY_CANVAS },
+                            onCookieDetected = { spotifyCanvasCookie = it },
                             onPlay = { songs, start, title ->
                                 playSongs(songs, start, DesktopQueueSource(title, PlaybackSourceType.BROWSE))
                             },

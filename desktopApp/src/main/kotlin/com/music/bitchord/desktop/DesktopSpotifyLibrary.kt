@@ -74,17 +74,56 @@ private object SpotifyMatchCache {
     }
 }
 
+/**
+ * Finds a Spotify web session a browser on this machine already holds. The Spotify desktop app
+ * keeps its login in its own encrypted store rather than as a web cookie, so the browsers are
+ * where an `sp_dc` can actually be found.
+ */
+internal object DesktopSpotifyBrowserSession {
+    data class Found(val cookie: String, val source: String)
+
+    fun find(): Found? = DesktopBrowserCookies.profiles().firstNotNullOfOrNull { profile ->
+        DesktopBrowserCookies.readCookie(profile, "spotify.com", "sp_dc")?.let { Found(it, profile.label) }
+    }
+}
+
 @Composable
 internal fun DesktopSpotifyLibraryPage(
-    signedIn: Boolean,
+    cookie: String,
     contentPadding: PaddingValues,
     onConnect: () -> Unit,
+    onCookieDetected: (String) -> Unit,
     onPlay: (songs: List<Song>, startIndex: Int, title: String) -> Unit,
     onEnqueue: (List<Song>) -> Unit,
 ) {
+    val signedIn = cookie.isNotBlank()
     var opened by remember { mutableStateOf<SpotifyPlaylist?>(null) }
+    var detecting by remember { mutableStateOf(false) }
+    var detectNote by remember { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
+    fun detect() {
+        if (detecting) return
+        detecting = true
+        scope.launch {
+            val found = withContext(Dispatchers.IO) { runCatching { DesktopSpotifyBrowserSession.find() }.getOrNull() }
+            detecting = false
+            if (found == null) {
+                detectNote = "No signed-in Spotify session found in Chrome, Chromium, Brave, Firefox or the others. " +
+                    "Sign in at open.spotify.com in a browser, then try again."
+            } else {
+                DesktopSpotifyToken.setCookie(found.cookie)
+                DesktopPersistence().saveString(KEY_SPOTIFY_SOURCE, found.source)
+                detectNote = null
+                DesktopTrackLog.log("spotify: using the session from ${found.source}")
+                onCookieDetected(found.cookie)
+            }
+        }
+    }
+    // Nothing saved yet: look for a browser session once, on the way in.
+    LaunchedEffect(Unit) { if (!signedIn) detect() }
     Box(Modifier.fillMaxSize().padding(contentPadding)) {
         when {
+            !signedIn && detecting -> SpotifyLoading()
             !signedIn -> Column(
                 Modifier.fillMaxWidth().padding(56.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -98,10 +137,23 @@ internal fun DesktopSpotifyLibraryPage(
                     color = DesktopSecondary,
                     style = MaterialTheme.typography.bodyMedium,
                 )
+                detectNote?.let {
+                    Spacer(Modifier.height(10.dp))
+                    Text(it, color = DesktopSecondary, style = MaterialTheme.typography.bodySmall)
+                }
                 Spacer(Modifier.height(16.dp))
-                SpotifyPill("Connect", BitChordIcons.Library, onConnect)
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    SpotifyPill("Use browser login", BitChordIcons.Library, ::detect)
+                    SpotifyPill("Paste sp_dc", BitChordIcons.Library, onConnect)
+                }
             }
-            opened == null -> SpotifyPlaylistGrid(onOpen = { opened = it }, onConnect = onConnect)
+            opened == null -> SpotifyPlaylistGrid(
+                onOpen = { opened = it },
+                onConnect = onConnect,
+                onRedetect = ::detect,
+                sessionKey = cookie.hashCode(),
+                source = DesktopPersistence().string(KEY_SPOTIFY_SOURCE).ifBlank { null },
+            )
             else -> SpotifyPlaylistTracks(
                 playlist = opened!!,
                 onBack = { opened = null },
@@ -113,11 +165,17 @@ internal fun DesktopSpotifyLibraryPage(
 }
 
 @Composable
-private fun SpotifyPlaylistGrid(onOpen: (SpotifyPlaylist) -> Unit, onConnect: () -> Unit) {
+private fun SpotifyPlaylistGrid(
+    onOpen: (SpotifyPlaylist) -> Unit,
+    onConnect: () -> Unit,
+    onRedetect: () -> Unit,
+    sessionKey: Int,
+    source: String?,
+) {
     var playlists by remember { mutableStateOf<List<SpotifyPlaylist>?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
     var reload by remember { mutableStateOf(0) }
-    LaunchedEffect(reload) {
+    LaunchedEffect(reload, sessionKey) {
         error = null
         playlists = null
         runCatching { SpotifyLibrary.playlists() }
@@ -136,6 +194,9 @@ private fun SpotifyPlaylistGrid(onOpen: (SpotifyPlaylist) -> Unit, onConnect: ()
                 Text("Spotify", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
                 IconButton(onClick = { reload++ }) { Icon(Icons.Rounded.Refresh, "Reload", tint = DesktopSecondary) }
             }
+            source?.let {
+                Text("Signed in through $it", color = DesktopSecondary, style = MaterialTheme.typography.bodySmall)
+            }
             Spacer(Modifier.height(8.dp))
         }
         val list = playlists
@@ -150,7 +211,10 @@ private fun SpotifyPlaylistGrid(onOpen: (SpotifyPlaylist) -> Unit, onConnect: ()
                         style = MaterialTheme.typography.bodySmall,
                     )
                     Spacer(Modifier.height(12.dp))
-                    SpotifyPill("Update sp_dc", BitChordIcons.Library, onConnect)
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        SpotifyPill("Use browser login", BitChordIcons.Library, onRedetect)
+                        SpotifyPill("Paste sp_dc", BitChordIcons.Library, onConnect)
+                    }
                 }
             }
             list == null -> item { SpotifyLoading() }
@@ -298,6 +362,8 @@ private fun SpotifyPlaylistTracks(
         }
     }
 }
+
+private const val KEY_SPOTIFY_SOURCE = "spotify_session_source"
 
 @Composable
 private fun SpotifyLoading() {
