@@ -244,10 +244,6 @@ internal object DesktopDiscordRpc {
             val text = settings.button1Text.value.ifEmpty { DesktopDiscordSettings.DEFAULT_BUTTON_1 }
             add(settings.resolveVariables(text, song.title, song.artist, song.albumName) to watchUrl(song))
         }
-        if (settings.button2Visible.value) {
-            val text = settings.button2Text.value.ifEmpty { DesktopDiscordSettings.DEFAULT_BUTTON_2 }
-            add(settings.resolveVariables(text, song.title, song.artist, song.albumName) to PROJECT_URL)
-        }
     }
 
     /**
@@ -288,8 +284,7 @@ internal object DesktopDiscordRpc {
     private const val KEY_USERNAME = "discord_username"
     private const val KEY_ENABLED = "discord_rpc_enabled"
 
-    private const val APPLICATION_ID = "1411019391843172514"
-    private const val PROJECT_URL = "https://github.com/kushagrasinghx/BitChord"
+    private const val APPLICATION_ID = ""
     private const val ART_PX = 480
     private const val FALLBACK_ART_URL =
         "https://raw.githubusercontent.com/kushagrasinghx/BitChord/main/app/src/main/ic_launcher-playstore.png"

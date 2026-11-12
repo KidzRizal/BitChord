@@ -124,8 +124,6 @@ private fun DiscordSection(
     val activityName by DesktopDiscordSettings.activityName.collectAsState()
     val button1Text by DesktopDiscordSettings.button1Text.collectAsState()
     val button1Visible by DesktopDiscordSettings.button1Visible.collectAsState()
-    val button2Text by DesktopDiscordSettings.button2Text.collectAsState()
-    val button2Visible by DesktopDiscordSettings.button2Visible.collectAsState()
     LaunchedEffect(Unit) { DesktopDiscordRpc.refreshLocalClient() }
 
     val connected = local || token.isNotBlank()
@@ -212,7 +210,7 @@ private fun DiscordSection(
         PanelGroup(
             header = "Buttons",
             footer = "{song_name}, {artist_name} and {album_name} are replaced with the track. " +
-                "The first button opens the song on YouTube Music and the second opens this project.",
+                "The button opens the song on YouTube Music.",
         ) {
             PanelSwitchRow(
                 title = DesktopStrings["first_button", "First button"],
@@ -227,24 +225,6 @@ private fun DiscordSection(
                             placeholder = DesktopDiscordSettings.DEFAULT_BUTTON_1,
                             initial = { button1Text },
                             onSave = DesktopDiscordSettings::setButton1Text,
-                        ),
-                    )
-                },
-            )
-            DesktopCardRule()
-            PanelSwitchRow(
-                title = DesktopStrings["second_button", "Second button"],
-                subtitle = button2Text.ifEmpty { DesktopDiscordSettings.DEFAULT_BUTTON_2 },
-                checked = button2Visible,
-                onCheckedChange = DesktopDiscordSettings::setButton2Visible,
-                onClick = {
-                    onEdit(
-                        DiscordField(
-                            title = DesktopStrings["second_button", "Second button"],
-                            message = DesktopStrings["discord_button_variables", "{song_name}, {artist_name} and {album_name} are replaced with the current track."],
-                            placeholder = DesktopDiscordSettings.DEFAULT_BUTTON_2,
-                            initial = { button2Text },
-                            onSave = DesktopDiscordSettings::setButton2Text,
                         ),
                     )
                 },
@@ -264,8 +244,6 @@ private fun DiscordSection(
             useDetails = useDetails,
             button1Text = button1Text,
             button1Visible = button1Visible,
-            button2Text = button2Text,
-            button2Visible = button2Visible,
         )
     }
 
@@ -410,8 +388,6 @@ private fun RichPresencePreview(
     useDetails: Boolean,
     button1Text: String,
     button1Visible: Boolean,
-    button2Text: String,
-    button2Visible: Boolean,
 ) {
     val title = song?.title ?: "Song title"
     val artist = song?.artist ?: "Artist"
@@ -461,21 +437,13 @@ private fun RichPresencePreview(
                 }
             }
         }
-        if (button1Visible || button2Visible) {
+        if (button1Visible) {
             Spacer(Modifier.height(10.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 if (button1Visible) {
                     PreviewButton(
                         DesktopDiscordSettings.resolveVariables(
                             button1Text.ifEmpty { DesktopDiscordSettings.DEFAULT_BUTTON_1 },
-                            title, artist, song?.albumName,
-                        ),
-                    )
-                }
-                if (button2Visible) {
-                    PreviewButton(
-                        DesktopDiscordSettings.resolveVariables(
-                            button2Text.ifEmpty { DesktopDiscordSettings.DEFAULT_BUTTON_2 },
                             title, artist, song?.albumName,
                         ),
                     )
