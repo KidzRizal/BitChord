@@ -430,8 +430,8 @@ private fun GlassNowPlaying(
                     badgeColor = secondary,
                     fadeOverflow = true,
                 )
-                FadingLine(
-                    text = song.artist,
+                MiniPlayerArtistAndQuality(
+                    artist = song.artist,
                     style = artistStyle,
                     color = secondary,
                 )

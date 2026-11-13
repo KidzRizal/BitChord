@@ -461,8 +461,8 @@ fun MiniPlayer(
                     badgeColor = MaterialTheme.colorScheme.onSurfaceVariant,
                     fadeOverflow = true,
                 )
-                FadingLine(
-                    text = song.artist,
+                MiniPlayerArtistAndQuality(
+                    artist = song.artist,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )

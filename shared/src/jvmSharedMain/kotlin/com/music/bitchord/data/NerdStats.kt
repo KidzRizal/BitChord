@@ -188,6 +188,15 @@ object NerdStats {
         if (hz < 1_000_000) null
         else java.math.BigDecimal(hz).movePointLeft(6).stripTrailingZeros().toPlainString() + " MHz"
 
+    /**
+     * A sample rate the way a player names it: 44100 -> "44.1 kHz",
+     * 48000 -> "48 kHz", DSD rates in MHz via [megahertzLabel].
+     */
+    fun sampleRateLabel(hz: Int): String =
+        megahertzLabel(hz)
+            ?: (java.math.BigDecimal(hz).movePointLeft(3).setScale(1, java.math.RoundingMode.HALF_UP)
+                .stripTrailingZeros().toPlainString() + " kHz")
+
     fun isDolbyAtmosMime(mimeType: String?): Boolean =
         mimeType != null && (mimeType.endsWith("eac3-joc") || mimeType.endsWith("eac3"))
 

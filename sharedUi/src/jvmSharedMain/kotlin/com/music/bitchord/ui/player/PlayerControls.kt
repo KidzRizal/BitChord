@@ -8,6 +8,7 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.isSpecified
+import com.music.bitchord.data.AudioQualityLabels
 import com.music.bitchord.data.model.ArtistCredit
 import com.music.bitchord.data.model.CreditSegment
 import com.music.bitchord.data.model.creditSegments
@@ -1759,6 +1760,7 @@ private fun LosslessOrStats(
             // Same line Tidal, Qobuz and Apple Music draw it at — see
             // [NerdStats.Snapshot.isHiRes].
             text = stringResource(if (nerdStats.isHiRes) Res.string.hi_res_lossless else Res.string.lossless),
+            detail = AudioQualityLabels.figures(nerdStats),
             iconPainter = painterResource(Res.drawable.ic_lossless),
             // Shimmer is reserved for the thing that was asked for and
             // confirmed. It is what makes the badge read as an achievement
@@ -1768,6 +1770,7 @@ private fun LosslessOrStats(
         )
         nerdStats?.isDolbyAtmos == true -> LosslessLabel(
             text = "Dolby Atmos",
+            detail = AudioQualityLabels.figures(nerdStats),
             animated = true,
             iconPainter = painterResource(Res.drawable.ic_dolby_atmos),
             modifier = modifier,
@@ -1777,14 +1780,22 @@ private fun LosslessOrStats(
         // app can reach. See [NerdStats.Snapshot.isHiQuality].
         nerdStats?.isHiQuality == true -> LosslessLabel(
             text = stringResource(Res.string.high_quality),
+            detail = AudioQualityLabels.figures(nerdStats),
             animated = false,
             iconPainter = rememberVectorPainter(Icons.Rounded.Headphones),
             // A Material glyph's own size is 24dp; the badge's are drawn small.
             iconSize = 13.dp,
             modifier = modifier,
         )
-        // Below that, no badge: "Medium Quality" and "Data Saver" are gone.
-        // The space under the bar is kept for what is worth announcing.
+        // Below that, no shimmer and no glyph — just what the stream is, so
+        // the type (lossy) and its sample rate are always readable.
+        nerdStats != null -> LosslessLabel(
+            text = AudioQualityLabels.type(nerdStats),
+            detail = AudioQualityLabels.figures(nerdStats),
+            animated = false,
+            iconPainter = null,
+            modifier = modifier,
+        )
         else -> {}
     }
 }
@@ -1794,8 +1805,10 @@ private fun LosslessOrStats(
 private fun LosslessLabel(
     text: String,
     animated: Boolean,
-    iconPainter: Painter,
+    iconPainter: Painter?,
     modifier: Modifier = Modifier,
+    /** The stream's figures, e.g. "24-bit/96 kHz", in dimmer type after [text]. */
+    detail: String? = null,
     /** Fades the whole label in and out, for a state that is still in progress. */
     pulsing: Boolean = false,
     /** Unspecified draws [iconPainter] at its own size. */
@@ -1834,13 +1847,15 @@ private fun LosslessLabel(
         val tint = chromeWhite(if (animated) 0.7f else 0.45f)
         // At the drawable's own size — the wave is wide, the double-D
         // nearly square, and one box squashed one of them.
-        Icon(
-            painter = iconPainter,
-            contentDescription = null,
-            tint = tint,
-            modifier = if (iconSize.isSpecified) Modifier.size(iconSize) else Modifier,
-        )
-        Spacer(Modifier.width(4.dp))
+        if (iconPainter != null) {
+            Icon(
+                painter = iconPainter,
+                contentDescription = null,
+                tint = tint,
+                modifier = if (iconSize.isSpecified) Modifier.size(iconSize) else Modifier,
+            )
+            Spacer(Modifier.width(4.dp))
+        }
         if (animated) {
             ShimmerText(text = text)
         } else {
@@ -1851,6 +1866,21 @@ private fun LosslessLabel(
                     fontSize = (MaterialTheme.typography.labelMedium.fontSize.value + BADGE_SIZE_BUMP).sp,
                 ),
                 color = chromeWhite(0.45f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+        if (detail != null) {
+            Text(
+                text = " · $detail",
+                // Gives way before the type does when the gap between the
+                // timestamps runs short.
+                modifier = Modifier.weight(1f, fill = false),
+                style = MaterialTheme.typography.labelMedium.copy(
+                    fontWeight = FontWeight.Normal,
+                    fontSize = (MaterialTheme.typography.labelMedium.fontSize.value + BADGE_SIZE_BUMP).sp,
+                ),
+                color = chromeWhite(0.4f),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
