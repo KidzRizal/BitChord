@@ -89,4 +89,8 @@
     <string name="d_translation_unavailable">Übersetzung nicht verfügbar</string>
     <string name="d_what_the_translate_button_translates_into">Wonach die Übersetzen-Schaltfläche im Liedtext übersetzt</string>
     <string name="d_off">Aus</string>
+    <string name="d_cookie_help_title">So bekommst du das Cookie (einmalig, etwa eine Minute):</string>
+    <string name="d_cookie_help_steps">1. Öffne music.youtube.com in Chrome oder Edge und stelle sicher, dass du angemeldet bist.\n2. Drücke F12, um die DevTools zu öffnen, und wechsle zum Tab „Network“.\n3. Lade die Seite neu (F5) und klicke auf eine Anfrage an music.youtube.com (zum Beispiel „browse“ oder „next“).\n4. Suche unter „Request Headers“ nach „cookie:“ und kopiere den ganzen Wert. Er ist lang und enthält SAPISID.\n5. Füge ihn unten ein und klicke auf Anmelden.</string>
+    <string name="d_cookie_help_open">music.youtube.com öffnen</string>
+    <string name="d_cookie_help_warning">Behandle dieses Cookie wie ein Passwort: Es meldet dich an. Meowmusic speichert es auf diesem Computer und sendet es nur an YouTube. Wenn du dich im Browser bei YouTube abmeldest, wird es ungültig.</string>
 </resources>

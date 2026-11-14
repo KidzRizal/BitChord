@@ -89,4 +89,8 @@
     <string name="d_translation_unavailable">无法翻译</string>
     <string name="d_what_the_translate_button_translates_into">歌词翻译按钮翻译成的语言</string>
     <string name="d_off">关闭</string>
+    <string name="d_cookie_help_title">如何获取 Cookie（只需一次，约一分钟）：</string>
+    <string name="d_cookie_help_steps">1. 在 Chrome 或 Edge 中打开 music.youtube.com，并确认已登录。\n2. 按 F12 打开开发者工具，切换到 Network 标签。\n3. 刷新页面（F5），点击任意一个发往 music.youtube.com 的请求（例如 \"browse\" 或 \"next\"）。\n4. 在 Request Headers 中找到 \"cookie:\"，复制完整的值。它很长，并包含 SAPISID。\n5. 粘贴到下方，然后点击登录。</string>
+    <string name="d_cookie_help_open">打开 music.youtube.com</string>
+    <string name="d_cookie_help_warning">请像对待密码一样保管此 Cookie：它可以以你的身份登录。Meowmusic 只把它保存在这台电脑上，并且只发送给 YouTube。在浏览器中退出 YouTube 会使其失效。</string>
 </resources>

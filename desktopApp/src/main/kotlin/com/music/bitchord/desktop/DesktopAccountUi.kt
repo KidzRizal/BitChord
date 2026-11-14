@@ -18,6 +18,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -346,11 +348,58 @@ internal fun DesktopSignInDialog(
             }
             when {
                 pasting -> {
+                    Column(
+                        Modifier
+                            .padding(horizontal = 22.dp)
+                            .heightIn(max = 260.dp)
+                            .verticalScroll(rememberScrollState()),
+                    ) {
+                        Text(
+                            DesktopStrings["d_cookie_help_title", "How to get the cookie (once, about a minute):"],
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.White,
+                        )
+                        Text(
+                            DesktopStrings[
+                                "d_cookie_help_steps",
+                                "1. Open music.youtube.com in Chrome or Edge and make sure you are signed in.\n" +
+                                    "2. Press F12 to open DevTools, then open the Network tab.\n" +
+                                    "3. Reload the page (F5) and click any request to music.youtube.com.\n" +
+                                    "4. Under Request Headers, find \"cookie:\" and copy its whole value.\n" +
+                                    "5. Paste it below and press Sign in.",
+                            ],
+                            style = MaterialTheme.typography.bodySmall,
+                            color = DesktopSecondary,
+                            modifier = Modifier.padding(top = 6.dp),
+                        )
+                        Text(
+                            DesktopStrings["d_cookie_help_open", "Open music.youtube.com"],
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = DesktopAccent,
+                            modifier = Modifier
+                                .padding(top = 8.dp)
+                                .clip(RoundedCornerShape(6.dp))
+                                .clickable { DesktopExternalLinks.open("https://music.youtube.com/") }
+                                .padding(vertical = 4.dp),
+                        )
+                        Text(
+                            DesktopStrings[
+                                "d_cookie_help_warning",
+                                "Treat this cookie like a password: it signs in as you. Meowmusic keeps it on " +
+                                    "this computer and sends it only to YouTube.",
+                            ],
+                            style = MaterialTheme.typography.bodySmall,
+                            color = DesktopSecondary.copy(alpha = 0.8f),
+                            modifier = Modifier.padding(top = 6.dp),
+                        )
+                    }
                     Text(
                         DesktopStrings["d_paste_the_cookie_header_for_music_youtube_com", "Paste the Cookie header for music.youtube.com."],
                         style = MaterialTheme.typography.bodySmall,
                         color = DesktopSecondary,
-                        modifier = Modifier.padding(horizontal = 22.dp),
+                        modifier = Modifier.padding(start = 22.dp, end = 22.dp, top = 10.dp),
                     )
                     BasicTextField(
                         value = pasted,

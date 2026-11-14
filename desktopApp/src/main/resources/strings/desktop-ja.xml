@@ -89,4 +89,8 @@
     <string name="d_translation_unavailable">翻訳を利用できません</string>
     <string name="d_what_the_translate_button_translates_into">歌詞の翻訳ボタンが翻訳する言語</string>
     <string name="d_off">オフ</string>
+    <string name="d_cookie_help_title">Cookie の取得方法（最初の一度だけ、約 1 分）:</string>
+    <string name="d_cookie_help_steps">1. Chrome または Edge で music.youtube.com を開き、ログインしていることを確認します。\n2. F12 で DevTools を開き、Network タブを開きます。\n3. ページを再読み込み（F5）し、music.youtube.com へのリクエスト（例: \"browse\" や \"next\"）をクリックします。\n4. Request Headers の \"cookie:\" を探し、値全体をコピーします。長い文字列で SAPISID を含みます。\n5. 下に貼り付けてログインを押します。</string>
+    <string name="d_cookie_help_open">music.youtube.com を開く</string>
+    <string name="d_cookie_help_warning">この Cookie はパスワードと同じように扱ってください。あなたとしてログインできます。Meowmusic はこのコンピューターに保存し、YouTube にのみ送信します。ブラウザで YouTube からログアウトすると無効になります。</string>
 </resources>

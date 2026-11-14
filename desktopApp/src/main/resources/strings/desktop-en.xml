@@ -91,4 +91,8 @@
     <string name="d_translation_unavailable">Translation unavailable</string>
     <string name="d_what_the_translate_button_translates_into">What the translate button on the lyrics translates into</string>
     <string name="d_off">Off</string>
+    <string name="d_cookie_help_title">How to get the cookie (once, about a minute):</string>
+    <string name="d_cookie_help_steps">1. Open music.youtube.com in Chrome or Edge and make sure you are signed in.\n2. Press F12 to open DevTools, then open the Network tab.\n3. Reload the page (F5) and click any request to music.youtube.com (for example \"browse\" or \"next\").\n4. Under Request Headers, find \"cookie:\" and copy its whole value. It is long and contains SAPISID.\n5. Paste it below and press Sign in.</string>
+    <string name="d_cookie_help_open">Open music.youtube.com</string>
+    <string name="d_cookie_help_warning">Treat this cookie like a password: it signs in as you. Meowmusic keeps it on this computer and sends it only to YouTube. Signing out of YouTube in the browser ends it.</string>
 </resources>

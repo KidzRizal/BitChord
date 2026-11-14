@@ -89,4 +89,8 @@
     <string name="d_translation_unavailable">Tłumaczenie niedostępne</string>
     <string name="d_what_the_translate_button_translates_into">Na jaki język przycisk tłumaczenia przekłada tekst</string>
     <string name="d_off">Wyłączone</string>
+    <string name="d_cookie_help_title">Jak zdobyć ciasteczko (raz, około minuty):</string>
+    <string name="d_cookie_help_steps">1. Otwórz music.youtube.com w Chrome lub Edge i upewnij się, że jesteś zalogowany.\n2. Naciśnij F12, aby otworzyć DevTools, i przejdź do karty Network.\n3. Odśwież stronę (F5) i kliknij dowolne żądanie do music.youtube.com (np. \"browse\" lub \"next\").\n4. W Request Headers znajdź \"cookie:\" i skopiuj całą wartość. Jest długa i zawiera SAPISID.\n5. Wklej ją poniżej i kliknij Zaloguj się.</string>
+    <string name="d_cookie_help_open">Otwórz music.youtube.com</string>
+    <string name="d_cookie_help_warning">Traktuj to ciasteczko jak hasło: loguje jako ty. Meowmusic przechowuje je na tym komputerze i wysyła tylko do YouTube. Wylogowanie z YouTube w przeglądarce je unieważnia.</string>
 </resources>

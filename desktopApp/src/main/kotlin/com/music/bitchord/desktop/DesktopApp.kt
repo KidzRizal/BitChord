@@ -3255,7 +3255,8 @@ fun BitChordDesktopApp() {
                             onPaste = { pasted ->
                                 scope.launch {
                                     if (!DesktopBrowserCookies.hasSigningSecret(pasted)) {
-                                        signInError = "That cookie has no signing secret in it — copy the whole header."
+                                        signInError = "That cookie has no SAPISID in it. Copy the whole value of the " +
+                                            "\"cookie:\" request header from a music.youtube.com request while signed in."
                                     } else {
                                         signIn(pasted, "the cookie you pasted")
                                     }

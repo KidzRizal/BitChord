@@ -89,4 +89,8 @@
     <string name="d_translation_unavailable">Tradução indisponível</string>
     <string name="d_what_the_translate_button_translates_into">Para qual idioma o botão de traduzir da letra traduz</string>
     <string name="d_off">Desligado</string>
+    <string name="d_cookie_help_title">Como obter o cookie (uma vez, cerca de um minuto):</string>
+    <string name="d_cookie_help_steps">1. Abre music.youtube.com no Chrome ou Edge e confirma que tens sessão iniciada.\n2. Prime F12 para abrir as DevTools e vai ao separador Network.\n3. Recarrega a página (F5) e clica num pedido para music.youtube.com (por exemplo \"browse\" ou \"next\").\n4. Em Request Headers, encontra \"cookie:\" e copia o valor inteiro. É longo e contém SAPISID.\n5. Cola-o abaixo e carrega em Iniciar sessão.</string>
+    <string name="d_cookie_help_open">Abrir music.youtube.com</string>
+    <string name="d_cookie_help_warning">Trata este cookie como uma palavra-passe: inicia sessão como tu. O Meowmusic guarda-o neste computador e só o envia ao YouTube. Terminar sessão no YouTube no navegador invalida-o.</string>
 </resources>

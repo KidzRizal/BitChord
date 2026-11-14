@@ -89,4 +89,8 @@
     <string name="d_translation_unavailable">अनुवाद उपलब्ध नहीं है</string>
     <string name="d_what_the_translate_button_translates_into">बोल का अनुवाद बटन किस भाषा में अनुवाद करता है</string>
     <string name="d_off">बंद</string>
+    <string name="d_cookie_help_title">कुकी कैसे पाएँ (एक बार, लगभग एक मिनट):</string>
+    <string name="d_cookie_help_steps">1. Chrome या Edge में music.youtube.com खोलें और पक्का करें कि आप साइन इन हैं।\n2. DevTools खोलने के लिए F12 दबाएँ, फिर Network टैब खोलें।\n3. पेज रीलोड करें (F5) और music.youtube.com की किसी भी रिक्वेस्ट पर क्लिक करें (जैसे \"browse\" या \"next\")।\n4. Request Headers में \"cookie:\" ढूँढें और उसकी पूरी वैल्यू कॉपी करें। यह लंबी होती है और इसमें SAPISID होता है।\n5. इसे नीचे पेस्ट करें और साइन इन दबाएँ।</string>
+    <string name="d_cookie_help_open">music.youtube.com खोलें</string>
+    <string name="d_cookie_help_warning">इस कुकी को पासवर्ड की तरह रखें: इससे आपके नाम से साइन इन होता है। Meowmusic इसे इसी कंप्यूटर पर रखता है और सिर्फ़ YouTube को भेजता है। ब्राउज़र में YouTube से साइन आउट करने पर यह ख़त्म हो जाती है।</string>
 </resources>

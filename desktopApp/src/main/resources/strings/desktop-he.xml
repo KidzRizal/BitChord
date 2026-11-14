@@ -89,4 +89,8 @@
     <string name="d_translation_unavailable">התרגום אינו זמין</string>
     <string name="d_what_the_translate_button_translates_into">לאיזו שפה כפתור התרגום מתרגם את המילים</string>
     <string name="d_off">כבוי</string>
+    <string name="d_cookie_help_title">איך להשיג את העוגייה (פעם אחת, כדקה):</string>
+    <string name="d_cookie_help_steps">1. פתח את music.youtube.com ב-Chrome או ב-Edge וודא שאתה מחובר.\n2. לחץ F12 כדי לפתוח את DevTools ועבור ללשונית Network.\n3. רענן את הדף (F5) ולחץ על בקשה כלשהי ל-music.youtube.com (למשל \"browse\" או \"next\").\n4. תחת Request Headers מצא את \"cookie:\" והעתק את כל הערך. הוא ארוך ומכיל SAPISID.\n5. הדבק אותו למטה ולחץ על התחברות.</string>
+    <string name="d_cookie_help_open">פתח את music.youtube.com</string>
+    <string name="d_cookie_help_warning">התייחס לעוגייה הזו כמו לסיסמה: היא מחברת אותך. Meowmusic שומרת אותה במחשב הזה ושולחת אותה רק ל-YouTube. התנתקות מ-YouTube בדפדפן מבטלת אותה.</string>
 </resources>

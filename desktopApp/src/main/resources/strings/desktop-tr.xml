@@ -89,4 +89,8 @@
     <string name="d_translation_unavailable">Çeviri kullanılamıyor</string>
     <string name="d_what_the_translate_button_translates_into">Şarkı sözlerindeki çevir düğmesinin çevirdiği dil</string>
     <string name="d_off">Kapalı</string>
+    <string name="d_cookie_help_title">Çerez nasıl alınır (bir kez, yaklaşık bir dakika):</string>
+    <string name="d_cookie_help_steps">1. Chrome veya Edge\'de music.youtube.com\'u açın ve oturum açtığınızdan emin olun.\n2. DevTools\'u açmak için F12\'ye basın ve Network sekmesine geçin.\n3. Sayfayı yenileyin (F5) ve music.youtube.com\'a giden herhangi bir isteğe tıklayın (örneğin \"browse\" veya \"next\").\n4. Request Headers altında \"cookie:\" satırını bulun ve tüm değerini kopyalayın. Uzundur ve SAPISID içerir.\n5. Aşağıya yapıştırın ve Oturum aç\'a basın.</string>
+    <string name="d_cookie_help_open">music.youtube.com\'u aç</string>
+    <string name="d_cookie_help_warning">Bu çerezi bir şifre gibi koruyun: sizin adınıza oturum açar. Meowmusic onu bu bilgisayarda saklar ve yalnızca YouTube\'a gönderir. Tarayıcıda YouTube\'dan çıkış yapmak onu geçersiz kılar.</string>
 </resources>
