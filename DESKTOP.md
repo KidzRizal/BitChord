@@ -54,8 +54,10 @@ itself, because Windows expects it to be a system component.
 ## Building the packages yourself
 
 jpackage builds a package by driving the target platform's own tooling, so each
-one has to be built on the platform it is for. This is what CI does; see
-[`.github/workflows/release.yml`](.github/workflows/release.yml).
+one has to be built on the platform it is for. CI can do it too, but only when
+started by hand: the "Build & Release" workflow on `main` (Actions > Run
+workflow) has a toggle per platform and a separate, off-by-default toggle that
+drafts the GitHub release. Nothing builds or releases on a push or a tag.
 
 On Linux — `rpm`, `fakeroot` and `binutils` must be installed for the packages,
 and `file` for the AppImage:
@@ -83,4 +85,4 @@ gradlew.bat :desktopApp:createDistributable
 ```
 
 Pass `-Pbitchord.version=1.2.3` to stamp a version other than the one in
-`desktopApp/build.gradle.kts`; a release build takes it from the tag.
+`desktopApp/build.gradle.kts`; a release build takes it from the workflow's version input.

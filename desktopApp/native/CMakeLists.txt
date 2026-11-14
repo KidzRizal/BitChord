@@ -71,6 +71,13 @@ endif()
 
 target_compile_options(bitchord_analysis PRIVATE -O2)
 
+# A native MinGW build (on Windows itself, not through mingw-w64.cmake) would
+# otherwise link libstdc++-6.dll and libgcc_s_seh-1.dll dynamically, and the
+# analyser then fails to load on any machine without MinGW on its PATH.
+if(MINGW)
+    target_link_options(bitchord_analysis PRIVATE -static -static-libgcc -static-libstdc++)
+endif()
+
 # `System.mapLibraryName` asks for `bitchord_analysis.dll` on Windows, with no
 # prefix — but MinGW's CMake defaults to the Unix `lib` one, so a cross-built
 # library came out as `libbitchord_analysis.dll` and the loader never found it.
