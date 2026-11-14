@@ -32,7 +32,7 @@ Nothing else has to be installed first — no JDK, no codec pack.
 | Linux | `BitChord-<version>-linux-x86_64.rpm` | `sudo dnf install ./BitChord-*.rpm` on Fedora, RHEL and openSUSE. |
 | Windows | `BitChord-<version>-windows-x64-setup.exe` | The ordinary installer. Installs for the current user, so it never asks for an administrator. |
 | Windows | `BitChord-<version>-windows-x64.msi` | The same thing for anyone who deploys by MSI. |
-| Windows | `BitChord-<version>-windows-x64-portable.zip` | Unzip anywhere and run `BitChord.exe`. Writes nothing outside the folder. |
+| Windows | `BitChord-<version>-windows-x64-portable.zip` | Unzip anywhere and run `Meowmusic.exe`. Writes nothing outside the folder. |
 
 The Linux packages are built on Ubuntu 22.04 against its glibc, so they install
 on that release and anything newer.
@@ -69,7 +69,7 @@ bash ./gradlew :desktopApp:packageRpm
 # The AppImage is wrapped around the app image jpackage produces.
 bash ./gradlew :desktopApp:createDistributable
 desktopApp/packaging/appimage.sh \
-  desktopApp/build/compose/binaries/main/app/BitChord \
+  desktopApp/build/compose/binaries/main/app/Meowmusic \
   dist/BitChord-linux-x86_64.AppImage
 ```
 

@@ -206,7 +206,7 @@ internal class DesktopMprisController(
             "CanQuit" to variant(false),
             "CanRaise" to variant(false),
             "HasTrackList" to variant(false),
-            "Identity" to variant("BitChord"),
+            "Identity" to variant("Meowmusic"),
             "DesktopEntry" to variant("bitchord"),
             "SupportedUriSchemes" to variant(listOf("file", "http", "https"), "as"),
             "SupportedMimeTypes" to variant(

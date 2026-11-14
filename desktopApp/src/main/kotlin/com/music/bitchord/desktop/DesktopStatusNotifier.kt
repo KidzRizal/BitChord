@@ -206,19 +206,19 @@ internal class DesktopStatusNotifierController(
 
     private fun icons(): List<TrayPixmap> = synchronized(lock) { iconPixmaps }
 
-    private fun tooltipTitle(): String = synchronized(lock) { nowPlaying } ?: "BitChord"
+    private fun tooltipTitle(): String = synchronized(lock) { nowPlaying } ?: "Meowmusic"
 
     private fun itemProperties(): Map<String, Variant<*>> = mapOf(
         "Category" to Variant("ApplicationStatus"),
         "Id" to Variant("bitchord"),
-        "Title" to Variant("BitChord"),
+        "Title" to Variant("Meowmusic"),
         "Status" to Variant("Active"),
         // The logo itself when it has been rendered, and a themed name as the fallback for a host
         // that ignores pixmaps.
         "IconName" to Variant(if (icons().isEmpty()) "multimedia-player" else ""),
         "IconPixmap" to Variant(icons(), "a(iiay)"),
         "ToolTip" to Variant(
-            ToolTip("", icons(), "BitChord", tooltipTitle()),
+            ToolTip("", icons(), "Meowmusic", tooltipTitle()),
         ),
         // Where the host reads the menu from.
         "Menu" to Variant(DBusPath(DesktopTrayMenu.OBJECT_PATH), "o"),

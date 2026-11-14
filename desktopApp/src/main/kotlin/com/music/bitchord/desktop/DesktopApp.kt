@@ -507,7 +507,7 @@ fun BitChordDesktopApp() {
             title = { Text(DesktopStrings["d_update_available", "Update available"]) },
             text = {
                 Text(
-                    "BitChord ${update.version} is out — you have ${DesktopUpdateChecker.currentVersion}." +
+                    "Meowmusic ${update.version} is out — you have ${DesktopUpdateChecker.currentVersion}." +
                         (update.notes?.takeIf { it.isNotBlank() }?.let { "\n\n${it.take(600)}" } ?: ""),
                 )
             },
@@ -4011,7 +4011,7 @@ private fun DesktopTopBar(
                 // The mark leads the player's own controls, now that the sidebar runs to the top.
                 Image(
                     painter = painterResource(Res.drawable.logo_mark),
-                    contentDescription = "BitChord",
+                    contentDescription = "Meowmusic",
                     modifier = Modifier.size(width = 28.dp, height = 18.dp),
                 )
                 Spacer(Modifier.width(14.dp))
@@ -5812,7 +5812,7 @@ private fun DesktopSettingsScreen(
                         DesktopStrings["d_tray_icon", "Tray icon"],
                         DesktopStrings[
                             "d_show_bitchord_in_the_system_tray_with_playback_controls",
-                            "Show BitChord in the system tray, with playback controls",
+                            "Show Meowmusic in the system tray, with playback controls",
                         ],
                         trayIconEnabled,
                         onTrayIconChange,
@@ -5822,7 +5822,7 @@ private fun DesktopSettingsScreen(
                             DesktopStrings["d_keep_playing_when_closed", "Keep playing when closed"],
                             DesktopStrings[
                                 "d_closing_the_window_leaves_bitchord_in_the_tray_instead_o",
-                                "Closing the window leaves BitChord in the tray instead of quitting",
+                                "Closing the window leaves Meowmusic in the tray instead of quitting",
                             ],
                             closeToTray,
                             onCloseToTrayChange,

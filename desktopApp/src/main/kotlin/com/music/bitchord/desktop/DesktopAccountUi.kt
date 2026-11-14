@@ -320,8 +320,10 @@ internal fun DesktopSignInDialog(
                 if (interactiveBrowser != null) {
                     DesktopStrings[
                         "d_choose_the_browser_sign_in_button_below",
-                        "Choose ${interactiveBrowser.label} below, then finish signing in inside " +
-                            "the separate browser window and close it to return to BitChord.",
+                        "Choose ${interactiveBrowser.label} below. It opens a separate, empty " +
+                            "${interactiveBrowser.name} profile (not your usual one, so it looks like a " +
+                            "guest window): sign in to Google there, then close it to return to Meowmusic. " +
+                            "The profile is kept, so next time you only open and close it.",
                     ]
                 } else {
                     DesktopStrings[
@@ -401,9 +403,10 @@ internal fun DesktopSignInDialog(
                                     Text(browser.label, color = Color.White)
                                     Text(
                                         if (busy == browser.label) {
-                                            "Finish signing in, then close Chrome"
+                                            "Finish signing in, then close ${browser.name} to come back"
                                         } else {
-                                            "Opens normal Chrome; close it when signed in"
+                                            "Opens a separate ${browser.name} profile just for Meowmusic. " +
+                                                "Sign in to Google once there, then close it."
                                         },
                                         style = MaterialTheme.typography.bodySmall,
                                         color = DesktopSecondary,
