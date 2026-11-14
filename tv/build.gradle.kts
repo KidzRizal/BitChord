@@ -52,6 +52,13 @@ val listenTogetherServer: String = (
         ?: "https://bitchord-listen-together.onrender.com"
     ).trim().trimEnd('/')
 
+/** The Discord application presence is published under; blank turns presence off. */
+val discordApplicationId: String = (
+    localProps.getProperty("DISCORD_APPLICATION_ID")
+        ?: System.getenv("DISCORD_APPLICATION_ID")
+        ?: ""
+    ).trim()
+
 /*
  * Bump this by hand before cutting each sideloaded test build ("beta2",
  * "beta3", ...) and blank it out before cutting the real release. Marks the
@@ -103,6 +110,7 @@ android {
         // the updater installs the TV app here, never the phone app. See
         // AppUpdateChecker.apkAssetUrl.
         buildConfigField("String", "UPDATE_APK_PREFIX", "\"BitChordTV-\"")
+        buildConfigField("String", "DISCORD_APPLICATION_ID", "\"${discordApplicationId.filter(Char::isDigit)}\"")
     }
 
     splits {
