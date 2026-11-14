@@ -44,6 +44,7 @@ import com.music.bitchord.data.model.Song
 import com.music.bitchord.data.model.UiState
 import com.music.bitchord.playback.playSongs
 import com.music.bitchord.ui.MainViewModel
+import com.music.bitchord.data.settings.AppSettings
 import com.music.bitchord.ui.tv.components.TvActivityIndicator
 import com.music.bitchord.ui.tv.components.TvButton
 import com.music.bitchord.ui.tv.components.TvChromeScrollEffect
@@ -82,6 +83,8 @@ fun TvSearchScreen(
     val history by viewModel.searchHistory.collectAsState()
     val suggestions by viewModel.suggestions.collectAsState()
     val loadingMore by viewModel.searchLoadingMore.collectAsState()
+    val youtubeSearchEnabled by AppSettings.youtubeSearchEnabled.collectAsState()
+    val searchFilters = if (youtubeSearchEnabled) SearchFilters + SearchFilter.YOUTUBE else SearchFilters
     val keyboard = LocalSoftwareKeyboardController.current
     val scope = rememberCoroutineScope()
     var menuSong by remember { mutableStateOf<Song?>(null) }
@@ -163,9 +166,9 @@ fun TvSearchScreen(
                 if (resultsState != null) {
                     Spacer(modifier = Modifier.height(14.dp))
                     TvSegmented(
-                        options = SearchFilters.map { it.label },
-                        selectedIndex = SearchFilters.indexOf(filter).coerceAtLeast(0),
-                        onSelect = { viewModel.onFilterChange(SearchFilters[it]) },
+                        options = searchFilters.map { it.label },
+                        selectedIndex = searchFilters.indexOf(filter).coerceAtLeast(0),
+                        onSelect = { viewModel.onFilterChange(searchFilters[it]) },
                     )
                 }
                 Spacer(modifier = Modifier.height(11.dp))

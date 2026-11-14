@@ -421,6 +421,9 @@
     <string name="playlist_reordered">Urutan playlist disimpan</string>
     <string name="save_order">Simpan</string>
     <string name="reset_to_default">Setel ulang ke default</string>
+    <string name="youtube_search">Pencarian YouTube</string>
+    <string name="youtube_search_subtitle">Tambahkan tab YouTube di Pencarian</string>
+    <string name="youtube_search_footer">Juga mencari video di youtube.com yang tidak ada di YouTube Music, seperti cover dan live set. Hasilnya diputar sebagai video.</string>
     <string name="rich_presence_footer">Tampilkan apa yang sedang Anda putar di profil Discord Anda.</string>
     <string name="save_name">Simpan nama</string>
     <string name="saved_to_downloads">Disimpan ke Unduhan</string>

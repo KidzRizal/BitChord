@@ -685,6 +685,9 @@
     <string name="reorder_failed">Couldn\'t save the new order</string>
     <string name="playlist_reordered">Playlist order saved</string>
     <string name="reset_to_default">Reset to default</string>
+    <string name="youtube_search">YouTube search</string>
+    <string name="youtube_search_subtitle">Add a YouTube tab to Search</string>
+    <string name="youtube_search_footer">Also searches youtube.com for videos YouTube Music does not list, such as covers and live sets. These play as videos.</string>
     <string name="rich_presence_footer">Show what you are playing on your Discord profile.</string>
     <string name="save_name">Save name</string>
     <string name="save_order">Save</string>

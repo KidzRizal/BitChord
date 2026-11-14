@@ -784,6 +784,13 @@ object AppSettings {
 
     val discordRpcEnabled = MutableStateFlow(true)
 
+    /**
+     * Whether Search offers a YouTube tab: plain youtube.com video search,
+     * for uploads YouTube Music's own index never catalogued. Off by default —
+     * those results are videos rather than catalogue tracks.
+     */
+    val youtubeSearchEnabled = MutableStateFlow(false)
+
     /** Put the track title on the bold profile line, in place of the artist. */
     val discordUseDetails = MutableStateFlow(false)
 
@@ -1134,6 +1141,7 @@ object AppSettings {
         discordName.value = prefs.getString(KEY_DISCORD_NAME, "").orEmpty()
         discordAvatar.value = prefs.getString(KEY_DISCORD_AVATAR, "").orEmpty()
         discordRpcEnabled.value = prefs.getBoolean(KEY_DISCORD_RPC_ENABLED, true)
+        youtubeSearchEnabled.value = prefs.getBoolean(KEY_YOUTUBE_SEARCH_ENABLED, false)
         discordUseDetails.value = prefs.getBoolean(KEY_DISCORD_USE_DETAILS, false)
         discordShowAudioQuality.value = prefs.getBoolean(KEY_DISCORD_SHOW_AUDIO_QUALITY, true)
         discordAdvancedMode.value = prefs.getBoolean(KEY_DISCORD_ADVANCED_MODE, false)
@@ -1894,6 +1902,11 @@ object AppSettings {
         prefs.edit().putBoolean(KEY_DISCORD_RPC_ENABLED, value).apply()
     }
 
+    fun setYoutubeSearchEnabled(value: Boolean) {
+        youtubeSearchEnabled.value = value
+        prefs.edit().putBoolean(KEY_YOUTUBE_SEARCH_ENABLED, value).apply()
+    }
+
     fun setDiscordUseDetails(value: Boolean) {
         discordUseDetails.value = value
         prefs.edit().putBoolean(KEY_DISCORD_USE_DETAILS, value).apply()
@@ -2368,6 +2381,7 @@ object AppSettings {
     private const val KEY_DISCORD_NAME = "discord_name"
     private const val KEY_DISCORD_AVATAR = "discord_avatar"
     private const val KEY_DISCORD_RPC_ENABLED = "discord_rpc_enabled"
+    private const val KEY_YOUTUBE_SEARCH_ENABLED = "youtube_search_enabled"
     private const val KEY_DISCORD_USE_DETAILS = "discord_use_details"
     private const val KEY_DISCORD_SHOW_AUDIO_QUALITY = "discord_show_audio_quality"
     private const val KEY_DISCORD_ADVANCED_MODE = "discord_advanced_mode"

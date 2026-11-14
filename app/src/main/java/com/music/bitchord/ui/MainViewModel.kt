@@ -1473,6 +1473,17 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
             PlaybackTracker.registeredPlays.drop(1).collect { homeStale = true }
         }
         viewModelScope.launch {
+            // Switching the YouTube search integration off takes its tab away;
+            // a search left on it would be answered by a source the listener
+            // has just turned off.
+            AppSettings.youtubeSearchEnabled.collect { enabled ->
+                if (!enabled && _filter.value == SearchFilter.YOUTUBE) {
+                    _filter.value = SearchFilter.ALL
+                    if (searchSubmitted) runSearch()
+                }
+            }
+        }
+        viewModelScope.launch {
             BoundedContextRequests.snapshot.collect { snapshot ->
                 snapshot?.let(::applyBoundedContextSnapshot)
             }

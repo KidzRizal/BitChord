@@ -66,6 +66,7 @@ fun AccountAndScrobblingScreen(
     val discordUsername by AppSettings.discordUsername.collectAsStateWithLifecycle()
     val discordRpcEnabled by AppSettings.discordRpcEnabled.collectAsStateWithLifecycle()
     val spotifyConnected by AppSettings.spotifySpdcToken.collectAsStateWithLifecycle()
+    val youtubeSearchEnabled by AppSettings.youtubeSearchEnabled.collectAsStateWithLifecycle()
 
     Column(
         modifier = modifier
@@ -123,6 +124,24 @@ fun AccountAndScrobblingScreen(
                     },
                 )
             }
+        }
+
+        SettingsGroup(
+            header = stringResource(R.string.search),
+            footer = stringResource(R.string.youtube_search_footer),
+        ) {
+            SettingsRow(
+                icon = SfIcons.Video,
+                title = stringResource(R.string.youtube_search),
+                subtitle = stringResource(R.string.youtube_search_subtitle),
+                trailing = {
+                    IosSwitch(
+                        checked = youtubeSearchEnabled,
+                        onCheckedChange = AppSettings::setYoutubeSearchEnabled,
+                    )
+                },
+                onClick = { AppSettings.setYoutubeSearchEnabled(!youtubeSearchEnabled) },
+            )
         }
 
         SettingsGroup(

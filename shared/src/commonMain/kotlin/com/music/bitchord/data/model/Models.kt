@@ -396,6 +396,14 @@ enum class SearchFilter(val label: String, val params: String?) {
     ALBUMS("Albums", "EgWKAQIYAWoKEAkQChAFEAMQBA=="),
     ARTISTS("Artists", "EgWKAQIgAWoKEAkQChAFEAMQBA=="),
     PLAYLISTS("Playlists", "EgWKAQIoAWoKEAkQChAFEAMQBA=="),
+    /**
+     * Plain youtube.com video search, not YouTube Music's index — the one
+     * place uploads YouTube Music never catalogued (covers, live sets,
+     * anything outside its music index) can be found. Its params are
+     * youtube.com's "Type: Video" filter. Opt-in: only offered while the
+     * YouTube search integration is switched on in settings.
+     */
+    YOUTUBE("YouTube", "EgIQAQ=="),
 }
 
 /** A card in a home-feed carousel: either a track (videoId) or an album/playlist (browseId). */

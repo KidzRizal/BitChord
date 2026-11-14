@@ -119,6 +119,39 @@ object InnertubeParser {
     }
 
     /**
+     * A youtube.com (WEB client) search page — or its continuation — read
+     * into the same rows a YouTube Music search produces.
+     *
+     * Only `videoRenderer` is read. That page is a different layout entirely
+     * from YouTube Music's: shelves of Shorts, channels, playlists and "people
+     * also watched" carousels sit between the videos, and none of them is a
+     * thing this app can play as a track. A video found here is always a
+     * video, so every row is flagged [Song.isVideo] whatever its thumbnail.
+     * Live streams are left out: they have no length and no end to play to.
+     */
+    fun parseYouTubeSearchPage(response: JsonObject): SearchPage {
+        val seen = HashSet<String>()
+        val rows = collectRenderers(response, "videoRenderer").mapNotNull { renderer ->
+            val videoId = renderer.s("videoId") ?: return@mapNotNull null
+            val duration = renderer.o("lengthText").text() ?: return@mapNotNull null
+            if (!seen.add(videoId)) return@mapNotNull null
+            val title = renderer.o("title").text() ?: return@mapNotNull null
+            val channel = (renderer.o("longBylineText") ?: renderer.o("ownerText")).text()
+            SearchResult.Track(
+                Song(
+                    videoId = videoId,
+                    title = title,
+                    artist = channel?.takeIf { it.isNotBlank() } ?: "Unknown artist",
+                    thumbnailUrl = renderer.o("thumbnail").a("thumbnails").best(),
+                    durationText = duration,
+                    isVideo = true,
+                ),
+            )
+        }
+        return SearchPage(rows, continuationToken(response))
+    }
+
+    /**
      * The typeahead queries out of a `music/get_search_suggestions` response.
      *
      * Two sections come back. The first is what this reads: query strings, as
@@ -1804,6 +1837,10 @@ private fun JsonObject.isPrivateUpload(): Boolean =
 
 private fun JsonElement?.runs(): String =
     this.a("runs")?.joinToString("") { it.s("text").orEmpty() }.orEmpty()
+
+/** A text field in either of its two shapes — `runs` or youtube.com's `simpleText`. */
+private fun JsonElement?.text(): String? =
+    runs().ifEmpty { s("simpleText") }?.trim()?.takeIf { it.isNotEmpty() }
 
 /** The first run's text alone — for a field that is a count or a label, never a sentence. */
 private fun JsonElement?.firstRunText(): String? =

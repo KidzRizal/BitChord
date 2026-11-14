@@ -98,6 +98,11 @@ object Innertube {
     private const val WEB_REMIX_VERSION = "1.20250101.01.00"
     private const val WEB_REMIX_CLIENT_ID = "67"
 
+    /** youtube.com's own Innertube, for [searchYouTube] only. */
+    private const val YOUTUBE_BASE = "https://www.youtube.com/youtubei/v1"
+    private const val WEB_VERSION = "2.20250101.00.00"
+    private const val WEB_CLIENT_ID = "1"
+
     private const val TAG = "BitChord"
 
     /** Session cookie captured by the login WebView; null = browse as guest. */
@@ -647,6 +652,23 @@ object Innertube {
     ) {
         put("continuation", token)
     }
+
+    /**
+     * A search against youtube.com itself rather than YouTube Music, for the
+     * uploads YouTube Music's index leaves out. WEB client, never signed in:
+     * the session belongs to music.youtube.com and nothing here needs it.
+     */
+    suspend fun searchYouTube(query: String, params: String? = null): JsonObject =
+        postYouTube("search", region = searchRegion) {
+            put("query", query)
+            params?.let { put("params", it) }
+        }
+
+    /** The next page of a [searchYouTube] result. */
+    suspend fun searchYouTubeContinuation(token: String): JsonObject =
+        postYouTube("search", region = searchRegion) {
+            put("continuation", token)
+        }
 
     /**
      * The typeahead list YouTube Music's own search box shows for a
@@ -1233,6 +1255,45 @@ object Innertube {
                 )
             }.body<JsonObject>()
         }
+    }
+
+    /**
+     * An anonymous request to youtube.com's own Innertube as the WEB client —
+     * the counterpart of [postMusicAnonymous] for the one feature that has to
+     * look outside YouTube Music. No cookie and no visitor id: both were
+     * minted for music.youtube.com.
+     */
+    private suspend fun postYouTube(
+        endpoint: String,
+        region: String? = currentRegion,
+        bodyExtras: JsonObjectBuilder.() -> Unit,
+    ): JsonObject = withRetry {
+        client.post("$YOUTUBE_BASE/$endpoint") {
+            contentType(ContentType.Application.Json)
+            parameter("prettyPrint", "false")
+            parameter("hl", currentLanguage)
+            header("X-Origin", YOUTUBE_ORIGIN)
+            header("Origin", YOUTUBE_ORIGIN)
+            header("Referer", "$YOUTUBE_ORIGIN/")
+            header("X-YouTube-Client-Name", WEB_CLIENT_ID)
+            header("X-YouTube-Client-Version", WEB_VERSION)
+            header("Accept-Language", acceptLanguageHeader)
+            setBody(
+                buildJsonObject {
+                    putJsonObject("context") {
+                        putJsonObject("client") {
+                            put("clientName", "WEB")
+                            put("clientVersion", WEB_VERSION)
+                            put("hl", currentLanguage)
+                            region?.let { put("gl", it) }
+                        }
+                        putJsonObject("user") { put("lockedSafetyMode", false) }
+                        putJsonObject("request") { put("useSsl", true) }
+                    }
+                    bodyExtras()
+                },
+            )
+        }.body<JsonObject>()
     }
 
     /** First string value under [key] anywhere in [element], depth-first. */

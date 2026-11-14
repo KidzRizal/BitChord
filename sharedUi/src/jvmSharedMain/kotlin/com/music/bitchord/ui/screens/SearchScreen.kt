@@ -94,6 +94,11 @@ fun SearchScreen(
     query: String,
     onQueryChange: (String) -> Unit,
     filter: SearchFilter,
+    /**
+     * The filter tabs on offer, in order. [SearchFilter.YOUTUBE] is only here
+     * while its integration is switched on, so the caller decides.
+     */
+    filters: List<SearchFilter> = SearchFilter.entries - SearchFilter.YOUTUBE,
     currentSong: Song?,
     isPlaying: Boolean,
     onFilterChange: (SearchFilter) -> Unit,
@@ -250,9 +255,9 @@ fun SearchScreen(
             // the app has one look for "pick one of these".
             if (results != null && !suggesting && !searchingLibrary && !searchingAddons) {
                 PillSegmentedControl(
-                    options = SearchFilter.entries.map { it.label },
-                    selectedIndex = filter.ordinal,
-                    onSelect = { onFilterChange(SearchFilter.entries[it]) },
+                    options = filters.map { it.label },
+                    selectedIndex = filters.indexOf(filter).coerceAtLeast(0),
+                    onSelect = { onFilterChange(filters[it]) },
                     modifier = Modifier.padding(start = PAGE_GUTTER, end = PAGE_GUTTER, bottom = 6.dp),
                 )
             }

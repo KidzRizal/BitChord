@@ -898,6 +898,7 @@ private fun BitChordApp(
     val moodGenreShelves by viewModel.moodGenreShelves.collectAsStateWithLifecycle()
     val libraryState by viewModel.library.collectAsStateWithLifecycle()
     val filter by viewModel.filter.collectAsStateWithLifecycle()
+    val youtubeSearchEnabled by AppSettings.youtubeSearchEnabled.collectAsStateWithLifecycle()
     val searchSource by viewModel.searchSource.collectAsStateWithLifecycle()
     val libraryResults by viewModel.libraryResults.collectAsStateWithLifecycle()
     val addonResults by viewModel.addonResults.collectAsStateWithLifecycle()
@@ -3484,6 +3485,11 @@ private fun BitChordApp(
                                 query = query,
                                 onQueryChange = viewModel::onQueryChange,
                                 filter = filter,
+                                filters = if (youtubeSearchEnabled) {
+                                    SearchFilter.entries.toList()
+                                } else {
+                                    SearchFilter.entries - SearchFilter.YOUTUBE
+                                },
                                 currentSong = player.song,
                                 isPlaying = player.isPlaying,
                                 onFilterChange = viewModel::onFilterChange,
