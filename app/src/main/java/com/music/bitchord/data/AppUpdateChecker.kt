@@ -42,8 +42,13 @@ object AppUpdateChecker {
 
     private const val CACHE_SUBDIR = "updates"
 
+    /**
+     * This fork's own releases (KidzRizal/BitChord), not upstream's: the APKs
+     * are signed with the fork's key, so an upstream APK could never install
+     * over this build anyway.
+     */
     private const val LATEST_RELEASE_URL =
-        "https://api.github.com/repos/kushagrasinghx/BitChord/releases/latest"
+        "https://api.github.com/repos/KidzRizal/BitChord/releases/latest"
 
     private val json = Json { ignoreUnknownKeys = true }
 
@@ -94,17 +99,17 @@ object AppUpdateChecker {
     }
 
     /**
-     * One release carries the phone app and the TV app, each as a universal
-     * APK plus per-ABI splits:
+     * A release carries this app's APKs as a universal build plus per-ABI
+     * splits, named the fork's way:
      *
-     *     BitChord-v1.8.apk     BitChord-v1.8_arm64-v8a.apk     ...
-     *     BitChordTV-v1.8.apk   BitChordTV-v1.8_arm64-v8a.apk   ...
+     *     BitChord-1.9.1-meng.3-universal.apk   BitChord-1.9.1-meng.3-arm64-v8a.apk   ...
      *
-     * so this app's APKs are the ones named with its own
+     * or upstream's older way (`BitChord-v1.8.apk`, `BitChord-v1.8_arm64-v8a.apk`).
+     * This app's files are the ones named with its own
      * [BuildConfig.UPDATE_APK_PREFIX] — "BitChord-" never matches a TV file,
-     * since the prefix ends at the hyphen. The universal build (no `_ABI`
-     * suffix) is taken first, as it installs anywhere; failing that, the split
-     * for this device's ABI. A release with neither leaves
+     * since the prefix ends at the hyphen, and desktop files are not `.apk`.
+     * The universal build is taken first, as it installs anywhere; failing
+     * that, the split for this device's ABI. A release with neither leaves
      * [UpdateInfo.apkUrl] null and the UI falls back to opening the releases
      * page.
      */
@@ -120,9 +125,15 @@ object AppUpdateChecker {
                 if (ours) name.removeSuffix(".apk").removeSuffix(".APK") to url else null
             }
             .orEmpty()
-        apks.firstOrNull { (name, _) -> '_' !in name }?.second
+        val abiSuffixes = listOf("arm64-v8a", "armeabi-v7a", "x86_64", "x86")
+        apks.firstOrNull { (name, _) -> name.endsWith("-universal", ignoreCase = true) }?.second
+            ?: apks.firstOrNull { (name, _) ->
+                '_' !in name && abiSuffixes.none { name.endsWith("-$it", ignoreCase = true) }
+            }?.second
             ?: Build.SUPPORTED_ABIS.firstNotNullOfOrNull { abi ->
-                apks.firstOrNull { (name, _) -> name.endsWith("_$abi") }?.second
+                apks.firstOrNull { (name, _) ->
+                    name.endsWith("_$abi") || name.endsWith("-$abi", ignoreCase = true)
+                }?.second
             }
     }.getOrNull()
 
@@ -226,13 +237,25 @@ object AppUpdateChecker {
         )
     }
 
-    /** A version split into its numeric dotted parts and whether it carries a "-suffix" (e.g. "-beta2"). */
-    private data class ParsedVersion(val parts: List<Int>, val isPreRelease: Boolean)
+    /**
+     * A version split into its numeric dotted parts, the fork's "-meng.N"
+     * revision (0 when absent) and whether it carries any other "-suffix"
+     * (e.g. "-beta2").
+     */
+    private data class ParsedVersion(val parts: List<Int>, val forkRevision: Int, val isPreRelease: Boolean)
 
     private fun parseVersion(raw: String): ParsedVersion {
-        val dash = raw.indexOf('-')
-        val base = if (dash >= 0) raw.substring(0, dash) else raw
-        return ParsedVersion(base.split(".").map { it.toIntOrNull() ?: 0 }, dash >= 0)
+        val pieces = raw.trim().split('-')
+        var forkRevision = 0
+        var preRelease = false
+        for (piece in pieces.drop(1)) {
+            if (piece.startsWith("meng", ignoreCase = true)) {
+                forkRevision = piece.substring(4).trimStart('.').toIntOrNull() ?: 0
+            } else if (piece.isNotEmpty()) {
+                preRelease = true
+            }
+        }
+        return ParsedVersion(pieces[0].split(".").map { it.toIntOrNull() ?: 0 }, forkRevision, preRelease)
     }
 
     /**
@@ -242,8 +265,11 @@ object AppUpdateChecker {
      * plain release of the same numbers, since the beta by definition predates
      * the tag it was testing toward. Without this, a beta and the release it
      * matches compare equal and testers never get nudged onto the real build.
+     *
+     * The fork's "-meng.N" revision is not a pre-release marker: with equal
+     * numbers, a higher N is newer ("1.9.1-meng.3" over "1.9.1-meng.2").
      */
-    private fun isNewer(latest: String, current: String): Boolean {
+    internal fun isNewer(latest: String, current: String): Boolean {
         val l = parseVersion(latest)
         val c = parseVersion(current)
         for (i in 0 until maxOf(l.parts.size, c.parts.size)) {
@@ -251,6 +277,7 @@ object AppUpdateChecker {
             val b = c.parts.getOrElse(i) { 0 }
             if (a != b) return a > b
         }
+        if (l.forkRevision != c.forkRevision) return l.forkRevision > c.forkRevision
         return c.isPreRelease && !l.isPreRelease
     }
 }

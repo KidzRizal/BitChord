@@ -45,6 +45,14 @@ extra["bitchordVersionCode"] = 39
 extra["bitchordVersionName"] = "1.9.1"
 
 /*
+ * This fork's own revision on top of upstream's version, appended to the
+ * phone app's versionName as "-meng.N" ("1.9.1-meng.3"). AppUpdateChecker
+ * reads it to tell this fork's releases apart, so bump it with every release
+ * tag (v1.9.1-meng.N) and reset it to 1 when upstream's version moves.
+ */
+extra["bitchordForkRevision"] = 3
+
+/*
  * Bump this by hand before cutting each sideloaded test build ("beta2",
  * "beta3", ...) and blank it out before cutting the real release. Marks the
  * versionName above as a pre-release: AppUpdateChecker.isNewer() treats any

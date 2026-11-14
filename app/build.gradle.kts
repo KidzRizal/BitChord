@@ -87,7 +87,7 @@ android {
         minSdk = 26
         targetSdk = 36
         versionCode = rootProject.extra["bitchordVersionCode"] as Int
-        versionName = rootProject.extra["bitchordVersionName"] as String
+        versionName = "${rootProject.extra["bitchordVersionName"]}-meng.${rootProject.extra["bitchordForkRevision"]}"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
