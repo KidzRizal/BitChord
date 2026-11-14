@@ -5367,6 +5367,15 @@ private fun BitChordApp(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     maxLines = 2,
                                 )
+                            } else if (mode == WebSessionMode.SIGN_IN) {
+                                // The in-app browser has its own cookie store, so it never shows
+                                // the accounts already signed in to Chrome; say why it looks empty.
+                                Text(
+                                    text = stringResource(R.string.sign_in_separate_window_hint),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 3,
+                                )
                             }
                         }
                         if (pageReady) {

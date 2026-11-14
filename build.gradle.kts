@@ -50,7 +50,7 @@ extra["bitchordVersionName"] = "1.9.1"
  * reads it to tell this fork's releases apart, so bump it with every release
  * tag (v1.9.1-meng.N) and reset it to 1 when upstream's version moves.
  */
-extra["bitchordForkRevision"] = 3
+extra["bitchordForkRevision"] = 4
 
 /*
  * Bump this by hand before cutting each sideloaded test build ("beta2",

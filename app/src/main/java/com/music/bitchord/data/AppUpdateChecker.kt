@@ -102,11 +102,11 @@ object AppUpdateChecker {
      * A release carries this app's APKs as a universal build plus per-ABI
      * splits, named the fork's way:
      *
-     *     BitChord-1.9.1-meng.3-universal.apk   BitChord-1.9.1-meng.3-arm64-v8a.apk   ...
+     *     Meowmusic-1.9.1-meng.4-universal.apk   Meowmusic-1.9.1-meng.4-arm64-v8a.apk   ...
      *
      * or upstream's older way (`BitChord-v1.8.apk`, `BitChord-v1.8_arm64-v8a.apk`).
      * This app's files are the ones named with its own
-     * [BuildConfig.UPDATE_APK_PREFIX] — "BitChord-" never matches a TV file,
+     * [BuildConfig.UPDATE_APK_PREFIX] — "Meowmusic-" never matches a TV file,
      * since the prefix ends at the hyphen, and desktop files are not `.apk`.
      * The universal build is taken first, as it installs anywhere; failing
      * that, the split for this device's ABI. A release with neither leaves
@@ -119,7 +119,12 @@ object AppUpdateChecker {
             ?.mapNotNull { asset ->
                 val name = asset["name"]?.jsonPrimitive?.contentOrNull ?: return@mapNotNull null
                 val url = asset["browser_download_url"]?.jsonPrimitive?.contentOrNull ?: return@mapNotNull null
-                val ours = name.startsWith(BuildConfig.UPDATE_APK_PREFIX, ignoreCase = true) &&
+                // "BitChord-" too: releases from before the rename still name the phone APK that way.
+                val ours = (
+                    name.startsWith(BuildConfig.UPDATE_APK_PREFIX, ignoreCase = true) ||
+                        (BuildConfig.UPDATE_APK_PREFIX == "Meowmusic-" && name.startsWith("BitChord-", ignoreCase = true))
+                    ) &&
+                    !name.contains("-desktop-", ignoreCase = true) &&
                     name.endsWith(".apk", ignoreCase = true) &&
                     asset["state"]?.jsonPrimitive?.contentOrNull == "uploaded"
                 if (ours) name.removeSuffix(".apk").removeSuffix(".APK") to url else null
