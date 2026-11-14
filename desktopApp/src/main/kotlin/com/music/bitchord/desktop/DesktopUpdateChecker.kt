@@ -32,8 +32,9 @@ internal object DesktopUpdateChecker {
         val notes: String?,
     )
 
+    /** This fork's own releases (KidzRizal/BitChord), not upstream's. */
     private const val LATEST_RELEASE_URL =
-        "https://api.github.com/repos/kushagrasinghx/BitChord/releases/latest"
+        "https://api.github.com/repos/KidzRizal/BitChord/releases/latest"
 
     val currentVersion: String = System.getProperty("bitchord.version") ?: "1.8-beta1"
 
@@ -66,9 +67,9 @@ internal object DesktopUpdateChecker {
     }.getOrNull()
 
     /**
-     * The release names its files `BitChord-<version>-windows-x64-setup.exe` and
-     * `BitChord-<version>-linux-x86_64.AppImage` (see .github/workflows/release.yml); match on the
-     * platform part so a version change does not matter.
+     * The release names its files `BitChord-desktop-<version>-windows-x64-setup.exe` and
+     * `BitChord-desktop-<version>-linux-x86_64.AppImage` (see main's .github/workflows/release.yml);
+     * match on the platform part so the prefix and version do not matter.
      */
     private fun installerUrl(release: JsonObject): String? {
         val suffixes = when {
@@ -87,15 +88,27 @@ internal object DesktopUpdateChecker {
         return null
     }
 
-    private class Parsed(val parts: List<Int>, val preRelease: Boolean)
+    /** Dotted numbers, the fork's `-meng.N` revision (0 when absent), and any other `-suffix`. */
+    private class Parsed(val parts: List<Int>, val forkRevision: Int, val preRelease: Boolean)
 
     private fun parse(raw: String): Parsed {
-        val dash = raw.indexOf('-')
-        val base = if (dash >= 0) raw.substring(0, dash) else raw
-        return Parsed(base.split('.').map { it.toIntOrNull() ?: 0 }, dash >= 0)
+        val pieces = raw.trim().split('-')
+        var forkRevision = 0
+        var preRelease = false
+        for (piece in pieces.drop(1)) {
+            if (piece.startsWith("meng", ignoreCase = true)) {
+                forkRevision = piece.substring(4).trimStart('.').toIntOrNull() ?: 0
+            } else if (piece.isNotEmpty()) {
+                preRelease = true
+            }
+        }
+        return Parsed(pieces[0].split('.').map { it.toIntOrNull() ?: 0 }, forkRevision, preRelease)
     }
 
-    /** Numeric comparison, with a `-betaN` build counted as older than the plain release it leads up to. */
+    /**
+     * Numeric comparison, with a `-betaN` build counted as older than the plain release it leads up
+     * to. The fork's `-meng.N` is a revision, not a pre-release: with equal numbers the higher N wins.
+     */
     internal fun isNewer(latest: String, current: String): Boolean {
         val l = parse(latest)
         val c = parse(current)
@@ -104,6 +117,7 @@ internal object DesktopUpdateChecker {
             val b = c.parts.getOrElse(i) { 0 }
             if (a != b) return a > b
         }
+        if (l.forkRevision != c.forkRevision) return l.forkRevision > c.forkRevision
         return c.preRelease && !l.preRelease
     }
 }
