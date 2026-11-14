@@ -1,9 +1,7 @@
 name: Deploy backend
 
+# Manual only (Actions > Run workflow); never runs on a push or PR.
 on:
-  push:
-    branches: [main]
-    paths: ['backend/**', '.github/workflows/deploy-backend.yml']
   workflow_dispatch:
 
 concurrency:

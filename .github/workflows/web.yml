@@ -3,16 +3,9 @@ name: Web
 # The web player (web/app), its browser extension (web/extension) and the code
 # they share (web/shared): typecheck, test and build all three, so a change
 # that only breaks the production build (Vite, WXT) is caught before it ships.
+# Manual only (Actions > Run workflow); never runs on a push or PR.
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'web/**'
-      - '.github/workflows/web.yml'
-  pull_request:
-    paths:
-      - 'web/**'
-      - '.github/workflows/web.yml'
+  workflow_dispatch:
 
 concurrency:
   group: web-${{ github.workflow }}-${{ github.ref }}

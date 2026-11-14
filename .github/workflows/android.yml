@@ -1,8 +1,7 @@
 name: Android Release APK
 
+# Manual only: no build on pushes to main. Releases go through release.yml.
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 jobs:

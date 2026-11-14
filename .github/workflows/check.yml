@@ -1,9 +1,8 @@
 name: Check
 
+# Manual only (Actions > Run workflow); never runs on a push or PR.
 on:
-  push:
-    branches: [main]
-  pull_request:
+  workflow_dispatch:
 
 concurrency:
   group: check-${{ github.workflow }}-${{ github.ref }}
